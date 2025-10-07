@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Nijjara ERP (MVP)</title>
+  <style>
+    html,body{margin:0;padding:0;font-family:system-ui,Segoe UI,Arial,sans-serif;background:#0f1418;color:#e9eef2}
+    .wrap{max-width:1000px;margin:40px auto;padding:0 16px}
+    .card{background:#151b21;border-radius:14px;padding:16px;margin:12px 0}
+    .row{display:flex;gap:12px;flex-wrap:wrap}
+    input,select,button{padding:10px;border-radius:10px;border:0}
+    input,select{background:#0f1418;color:#e9eef2}
+    button{background:#8fd3fe;color:#0b1116;cursor:pointer}
+    h2,h3{margin:8px 0}
+    table{width:100%;border-collapse:collapse;margin-top:8px}
+    th,td{border-bottom:1px solid #26303a;padding:8px;text-align:left}
+    .muted{opacity:.85}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    label{display:block;font-size:12px;margin-bottom:6px;opacity:.9}
+    .field{display:flex;flex-direction:column}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h2>Nijjara ERP — Minimal MVP</h2>
+    <div id="userCard" class="card">Checking your account…</div>
+
+    <div class="row">
+      <div class="card" style="flex:1">
+        <h3 class="muted">Quick Actions</h3>
+        <div class="row">
+          <button onclick="loadEmployees()">List Employees</button>
+          <button onclick="loadProjects()">List Projects</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="card" style="flex:1">
+        <h3>New Employee</h3>
+        <div class="grid-2">
+          <div class="field"><label>Full Name</label><input id="e_full" /></div>
+          <div class="field"><label>National ID</label><input id="e_nat" /></div>
+          <div class="field"><label>Phone</label><input id="e_phone" /></div>
+          <div class="field"><label>Email</label><input id="e_email" /></div>
+          <div class="field"><label>Hire Date (YYYY-MM-DD)</label><input id="e_hire" placeholder="YYYY-MM-DD"/></div>
+        </div>
+        <div style="margin-top:10px"><button onclick="saveEmployee()">Save Employee</button></div>
+        <div id="e_msg" class="muted" style="margin-top:8px"></div>
+      </div>
+
+      <div class="card" style="flex:1">
+        <h3>New Project</h3>
+        <div class="grid-2">
+          <div class="field"><label>Name</label><input id="p_name" /></div>
+          <div class="field"><label>Customer</label><input id="p_cust" /></div>
+          <div class="field"><label>Start Date (YYYY-MM-DD)</label><input id="p_start" placeholder="YYYY-MM-DD"/></div>
+          <div class="field"><label>End Date (YYYY-MM-DD)</label><input id="p_end" placeholder="YYYY-MM-DD"/></div>
+        </div>
+        <div style="margin-top:10px"><button onclick="saveProject()">Save Project</button></div>
+        <div id="p_msg" class="muted" style="margin-top:8px"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Data</h3>
+      <div id="dataArea" class="muted">No data yet.</div>
+    </div>
+  </div>
+
+  <script>
+    function set(el, html){ document.getElementById(el).innerHTML = html; }
+
+    google.script.run.withSuccessHandler(r=>{
+      const u = r.user;
+      set('userCard', `
+        <div><b>User:</b> ${u.displayName} &lt;${u.email}&gt;</div>
+        <div><b>Role:</b> ${u.role}</div>
+        <div class="muted" style="margin-top:6px">Ping: ${r.at}</div>
+      `);
+}).withFailureHandler(err=>{
+  console.error(err);
+  set('userCard', '<span style="color:#ff8c8c">Auth error: '+(err && err.message ? err.message : 'Login required')+'</span>');
+}).api_ping();
+
+    function loadEmployees(){
+      google.script.run.withSuccessHandler(rows=>{
+        if(!rows.length) return set('dataArea','No employees yet.');
+        const html = `
+          <table>
+            <thead><tr><th>ID</th><th>Name</th><th>Phone</th><th>Email</th><th>Status</th></tr></thead>
+            <tbody>
+              ${rows.map(r=>`<tr>
+                <td>${r.Employee_ID}</td>
+                <td>${r.Full_Name}</td>
+                <td>${r.Phone}</td>
+                <td>${r.Email}</td>
+                <td>${r.Status}</td>
+              </tr>`).join('')}
+            </tbody>
+          </table>`;
+        set('dataArea', html);
+      }).withFailureHandler(err=>alert(err.message)).HR_listEmployees(50,0);
+    }
+
+    function loadProjects(){
+      google.script.run.withSuccessHandler(rows=>{
+        if(!rows.length) return set('dataArea','No projects yet.');
+        const html = `
+          <table>
+            <thead><tr><th>ID</th><th>Name</th><th>Customer</th><th>Status</th></tr></thead>
+            <tbody>
+              ${rows.map(r=>`<tr>
+                <td>${r.Project_ID}</td>
+                <td>${r.Name}</td>
+                <td>${r.Customer}</td>
+                <td>${r.Status}</td>
+              </tr>`).join('')}
+            </tbody>
+          </table>`;
+        set('dataArea', html);
+      }).withFailureHandler(err=>alert(err.message)).PRJ_listProjects(50,0);
+    }
+
+    function saveEmployee(){
+      const data = {
+        Full_Name: document.getElementById('e_full').value,
+        National_ID: document.getElementById('e_nat').value,
+        Phone: document.getElementById('e_phone').value,
+        Email: document.getElementById('e_email').value,
+        Hire_Date: document.getElementById('e_hire').value
+      };
+      google.script.run.withSuccessHandler(r=>{
+        document.getElementById('e_msg').textContent = `Saved: ${r.id}`;
+        loadEmployees();
+      }).withFailureHandler(err=>alert(err.message)).HR_createEmployee(data);
+    }
+
+    function saveProject(){
+      const data = {
+        Name: document.getElementById('p_name').value,
+        Customer: document.getElementById('p_cust').value,
+        Start_Date: document.getElementById('p_start').value,
+        End_Date: document.getElementById('p_end').value
+      };
+      google.script.run.withSuccessHandler(r=>{
+        document.getElementById('p_msg').textContent = `Saved: ${r.id}`;
+        loadProjects();
+      }).withFailureHandler(err=>alert(err.message)).PRJ_createProject(data);
+    }
+  </script>
+</body>
+</html>
