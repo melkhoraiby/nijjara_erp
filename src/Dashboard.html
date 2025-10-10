@@ -1287,6 +1287,7 @@
           setTimeout(() => toast.classList.remove('show'), 3000);
         };
         const toggleButtonLoading = (button, isLoading) => {
+          if (!button) return;
           button.classList.toggle('loading', isLoading);
           button.disabled = isLoading;
         };
@@ -1383,31 +1384,35 @@
 
         // --- UTIL ---
         const openModal = (m) => {
+          if (!m) return;
           m.classList.add('active');
           const f = m.querySelector('form');
           if (f) f.querySelectorAll('input,select,textarea').forEach((el) => (el.disabled = false));
         };
         const closeModal = (m) => {
+          if (!m) return;
           m.classList.remove('active');
           const f = m.querySelector('form');
           if (f) f.querySelectorAll('input,select,textarea').forEach((el) => (el.disabled = true));
         };
-        [addUserModal, editUserModal, deleteConfirmModal, resetPasswordModal].forEach((modal) => {
-          modal.addEventListener('click', (e) => {
-            if (
-              e.target.classList.contains('modal-overlay') ||
-              e.target.classList.contains('close-button')
-            ) {
-              closeModal(modal);
-              if (modal === resetPasswordModal) {
-                resetPasswordResult.style.display = 'none';
-                resetPasswordResult.textContent = '';
-                const f = document.getElementById('reset-password-input');
-                if (f) f.value = '';
+        [addUserModal, editUserModal, deleteConfirmModal, resetPasswordModal]
+          .filter(Boolean)
+          .forEach((modal) => {
+            modal.addEventListener('click', (e) => {
+              if (
+                e.target.classList.contains('modal-overlay') ||
+                e.target.classList.contains('close-button')
+              ) {
+                closeModal(modal);
+                if (modal === resetPasswordModal && resetPasswordResult) {
+                  resetPasswordResult.style.display = 'none';
+                  resetPasswordResult.textContent = '';
+                  const f = document.getElementById('reset-password-input');
+                  if (f) f.value = '';
+                }
               }
-            }
+            });
           });
-        });
 
         const populateRoleDropdowns = () => {
           const createOption = (role) =>
@@ -1593,12 +1598,13 @@
 
         const handleCreateUser = (e) => {
           e.preventDefault();
+          if (!addUserForm) return;
           const saveButton = addUserForm.querySelector('.main-button');
           const userData = {
             Full_Name: document.getElementById('add-Full_Name').value,
             Email: document.getElementById('add-Email').value,
             Username: document.getElementById('add-Username').value,
-            Role_Id: addUserRoleSelect.value,
+            Role_Id: addUserRoleSelect ? addUserRoleSelect.value : '',
           };
           toggleButtonLoading(saveButton, true);
 
@@ -1610,7 +1616,7 @@
                 renderUsersTable();
                 closeModal(addUserModal);
                 showToast(response.message || 'تم إنشاء المستخدم بنجاح');
-                addUserForm.reset();
+                if (addUserForm) addUserForm.reset();
               } else showToast('لم يتم إنشاء المستخدم', true);
             })
             .withFailureHandler((error) => {
@@ -1622,13 +1628,14 @@
 
         const handleEditUser = (e) => {
           e.preventDefault();
+          if (!editUserForm) return;
           const saveButton = editUserForm.querySelector('.main-button');
           const userId = document.getElementById('edit-User_Id').value;
           const updatedData = {
             Full_Name: document.getElementById('edit-Full_Name').value,
             Email: document.getElementById('edit-Email').value,
             Username: document.getElementById('edit-Username').value,
-            Role_Id: editUserRoleSelect.value,
+            Role_Id: editUserRoleSelect ? editUserRoleSelect.value : '',
           };
           toggleButtonLoading(saveButton, true);
 
@@ -1704,8 +1711,10 @@
           if (!AppState.userToReset) return;
           const saveButton = confirmResetBtn;
           toggleButtonLoading(saveButton, true);
-          resetPasswordResult.style.display = 'none';
-          resetPasswordResult.textContent = '';
+          if (resetPasswordResult) {
+            resetPasswordResult.style.display = 'none';
+            resetPasswordResult.textContent = '';
+          }
           const targetUserId = AppState.userToReset.User_Id;
           const newPasswordField = document.getElementById('reset-password-input');
           const newPassword = newPasswordField ? newPasswordField.value : '';
@@ -1719,8 +1728,10 @@
             .withSuccessHandler((response) => {
               toggleButtonLoading(saveButton, false);
               if (response && response.success && response.password) {
-                resetPasswordResult.textContent = `تم تحديث كلمة المرور إلى: ${response.password}`;
-                resetPasswordResult.style.display = 'block';
+                if (resetPasswordResult) {
+                  resetPasswordResult.textContent = `تم تحديث كلمة المرور إلى: ${response.password}`;
+                  resetPasswordResult.style.display = 'block';
+                }
                 showToast(response.message || 'تم تحديث كلمة المرور');
                 fetchAllUsers();
               } else {
@@ -1779,8 +1790,8 @@
           addUserBtn.addEventListener('click', () =>
             ensureRolesLoaded(() => openModal(addUserModal))
           );
-        addUserForm.addEventListener('submit', handleCreateUser);
-        editUserForm.addEventListener('submit', handleEditUser);
+        if (addUserForm) addUserForm.addEventListener('submit', handleCreateUser);
+        if (editUserForm) editUserForm.addEventListener('submit', handleEditUser);
 
         // Users table actions via delegation (works even if table injected later)
         if (usersCanvas) {
@@ -1795,11 +1806,15 @@
               const userToEdit = AppState.users.find((u) => u.User_Id == userId);
               if (userToEdit) {
                 ensureRolesLoaded(() => {
-                  document.getElementById('edit-User_Id').value = userToEdit.User_Id;
-                  document.getElementById('edit-Full_Name').value = userToEdit.Full_Name || '';
-                  document.getElementById('edit-Email').value = userToEdit.Email || '';
-                  document.getElementById('edit-Username').value = userToEdit.Username || '';
-                  editUserRoleSelect.value = userToEdit.Role_Id || '';
+                  const editUserIdInput = document.getElementById('edit-User_Id');
+                  const editFullNameInput = document.getElementById('edit-Full_Name');
+                  const editEmailInput = document.getElementById('edit-Email');
+                  const editUsernameInput = document.getElementById('edit-Username');
+                  if (editUserIdInput) editUserIdInput.value = userToEdit.User_Id;
+                  if (editFullNameInput) editFullNameInput.value = userToEdit.Full_Name || '';
+                  if (editEmailInput) editEmailInput.value = userToEdit.Email || '';
+                  if (editUsernameInput) editUsernameInput.value = userToEdit.Username || '';
+                  if (editUserRoleSelect) editUserRoleSelect.value = userToEdit.Role_Id || '';
                   openModal(editUserModal);
                 });
               }
@@ -1816,11 +1831,13 @@
               const userToDelete = AppState.users.find((u) => u.User_Id == userId);
               if (userToDelete) {
                 AppState.userToDelete = userToDelete;
-                userToDeleteNameEl.textContent =
-                  userToDelete.Full_Name || userToDelete.Username || userId;
+                if (userToDeleteNameEl)
+                  userToDeleteNameEl.textContent =
+                    userToDelete.Full_Name || userToDelete.Username || userId;
                 openModal(deleteConfirmModal);
               } else {
-                userToDeleteNameEl.textContent = 'مستخدم غير معروف';
+                if (userToDeleteNameEl)
+                  userToDeleteNameEl.textContent = 'مستخدم غير معروف';
                 openModal(deleteConfirmModal);
               }
             }
@@ -1830,9 +1847,12 @@
               const userToReset = AppState.users.find((u) => u.User_Id == userId);
               if (userToReset) {
                 AppState.userToReset = userToReset;
-                userToResetNameEl.textContent = userToReset.Full_Name || '';
-                resetPasswordResult.style.display = 'none';
-                resetPasswordResult.textContent = '';
+                if (userToResetNameEl)
+                  userToResetNameEl.textContent = userToReset.Full_Name || '';
+                if (resetPasswordResult) {
+                  resetPasswordResult.style.display = 'none';
+                  resetPasswordResult.textContent = '';
+                }
                 openModal(resetPasswordModal);
               }
             }
@@ -1840,16 +1860,22 @@
         }
 
         // Delete / Reset modal buttons
-        confirmDeleteBtn.addEventListener('click', handleDeleteUser);
-        cancelDeleteBtn.addEventListener('click', () => closeModal(deleteConfirmModal));
-        confirmResetBtn.addEventListener('click', handleResetUserPassword);
-        cancelResetBtn.addEventListener('click', () => {
-          closeModal(resetPasswordModal);
-          resetPasswordResult.style.display = 'none';
-          resetPasswordResult.textContent = '';
-          const f = document.getElementById('reset-password-input');
-          if (f) f.value = '';
-        });
+        if (confirmDeleteBtn)
+          confirmDeleteBtn.addEventListener('click', handleDeleteUser);
+        if (cancelDeleteBtn)
+          cancelDeleteBtn.addEventListener('click', () => closeModal(deleteConfirmModal));
+        if (confirmResetBtn)
+          confirmResetBtn.addEventListener('click', handleResetUserPassword);
+        if (cancelResetBtn)
+          cancelResetBtn.addEventListener('click', () => {
+            closeModal(resetPasswordModal);
+            if (resetPasswordResult) {
+              resetPasswordResult.style.display = 'none';
+              resetPasswordResult.textContent = '';
+            }
+            const f = document.getElementById('reset-password-input');
+            if (f) f.value = '';
+          });
 
         // Init
         switchView('login-screen');
