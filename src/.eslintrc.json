@@ -1,0 +1,37 @@
+{
+  "env": {
+    "es6": true,
+    "browser": true,
+    "node": true
+  },
+  "globals": {
+    "Logger": "readonly",
+    "SpreadsheetApp": "readonly",
+    "Session": "readonly",
+    "DriveApp": "readonly",
+    "UrlFetchApp": "readonly",
+    "PropertiesService": "readonly",
+    "Utilities": "readonly",
+    "MailApp": "readonly",
+    "HtmlService": "readonly",
+    "console": "readonly",
+    "global": "readonly"
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:googleappsscript/recommended",
+    "plugin:prettier/recommended"
+  ],
+  "plugins": ["googleappsscript", "prettier"],
+  "parserOptions": {
+    "ecmaVersion": 2020,
+    "sourceType": "module"
+  },
+  "rules": {
+    "prettier/prettier": "error",
+    "no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+    "no-console": "off",
+    "eqeqeq": ["error", "always"],
+    "no-undef": "error"
+  }
+}

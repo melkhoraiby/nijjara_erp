@@ -1,0 +1,30 @@
+{
+  "name": "nijjara_erp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint src/**/*.js --fix",
+      "format": "prettier --write \"src/**/*.{js,html,css}\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/melkhoraiby/nijjara_erp.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/melkhoraiby/nijjara_erp/issues"
+  },
+  "homepage": "https://github.com/melkhoraiby/nijjara_erp#readme",
+  "devDependencies": {
+    "eslint": "^9.37.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-googleappsscript": "^1.0.5",
+    "eslint-plugin-prettier": "^5.5.4",
+    "prettier": "^3.6.2"
+  }
+}

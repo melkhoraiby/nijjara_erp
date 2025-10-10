@@ -1,0 +1,606 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Nijjara ERP</title>
+    <!-- Theme: clean, glassy cards, subtle gradient header, smooth micro‑animations -->
+    <style>
+      :root {
+        --bg: #0f172a; /* slate-900 */
+        --panel: rgba(255, 255, 255, 0.06);
+        --panel-hover: rgba(255, 255, 255, 0.1);
+        --card: rgba(255, 255, 255, 0.08);
+        --ring: rgba(255, 255, 255, 0.18);
+        --text: #e5e7eb; /* gray-200 */
+        --muted: #94a3b8; /* slate-400 */
+        --brand: #38bdf8; /* sky-400 */
+        --brand-2: #22d3ee; /* cyan-400 */
+        --danger: #ef4444; /* red-500 */
+        --ok: #22c55e; /* green-500 */
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        margin: 0;
+        background:
+          radial-gradient(1200px 800px at 100% -10%, rgba(34, 211, 238, 0.12), transparent 60%),
+          radial-gradient(1000px 700px at -10% 110%, rgba(56, 189, 248, 0.12), transparent 60%),
+          linear-gradient(180deg, #0b1220, #0f172a 30%);
+        font-family:
+          system-ui,
+          -apple-system,
+          Segoe UI,
+          Roboto,
+          'Noto Kufi Arabic',
+          Arial,
+          sans-serif;
+        color: var(--text);
+      }
+      .shell {
+        display: grid;
+        grid-template-columns: 260px 1fr;
+        min-height: 100vh;
+      }
+      .sidebar {
+        backdrop-filter: blur(10px);
+        background: var(--panel);
+        border-inline-start: 1px solid var(--ring);
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 1.25rem 1rem;
+        border-block-end: 1px solid var(--ring);
+      }
+      .brand .logo {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, var(--brand), var(--brand-2));
+        box-shadow: 0 6px 24px rgba(56, 189, 248, 0.3);
+      }
+      .brand h1 {
+        font-size: 1.1rem;
+        margin: 0;
+        letter-spacing: 0.5px;
+      }
+      .nav {
+        padding: 0.75rem;
+      }
+      .nav h3 {
+        margin: 1rem 0.75rem 0.5rem;
+        font-size: 0.8rem;
+        color: var(--muted);
+      }
+      .nav a {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.65rem 0.75rem;
+        margin: 0.2rem 0.5rem;
+        border-radius: 12px;
+        text-decoration: none;
+        color: var(--text);
+        transition: 0.2s ease background;
+      }
+      .nav a:hover {
+        background: var(--panel-hover);
+      }
+      .nav a[aria-current='page'] {
+        outline: 1px solid var(--ring);
+        background: var(--panel-hover);
+      }
+
+      .main {
+        display: grid;
+        grid-template-rows: auto 1fr;
+      }
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 1.25rem;
+        border-block-end: 1px solid var(--ring);
+        backdrop-filter: blur(10px);
+        background: var(--panel);
+      }
+      .search {
+        display: flex;
+        gap: 0.6rem;
+        align-items: center;
+        background: var(--card);
+        border: 1px solid var(--ring);
+        padding: 0.5rem 0.75rem;
+        border-radius: 12px;
+      }
+      .search input {
+        all: unset;
+        color: var(--text);
+        width: 280px;
+      }
+      .user-mini {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+      }
+      .badge {
+        padding: 0.2rem 0.6rem;
+        border-radius: 999px;
+        background: linear-gradient(135deg, var(--brand), var(--brand-2));
+        color: #0b1220;
+        font-weight: 600;
+      }
+
+      .content {
+        padding: 1.25rem;
+        display: grid;
+        gap: 1rem;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(12, 1fr);
+        gap: 1rem;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--ring);
+        border-radius: 16px;
+        padding: 1rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+      }
+      .kpi {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+      }
+      .kpi .n {
+        font-size: 1.8rem;
+        font-weight: 800;
+      }
+
+      .toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+      .btn {
+        appearance: none;
+        border: none;
+        cursor: pointer;
+        padding: 0.6rem 0.9rem;
+        border-radius: 12px;
+        font-weight: 600;
+        color: #0b1220;
+        background: linear-gradient(135deg, var(--brand), var(--brand-2));
+        box-shadow: 0 6px 18px rgba(34, 211, 238, 0.25);
+        transition: transform 0.08s ease;
+      }
+      .btn:active {
+        transform: translateY(1px);
+      }
+      .btn.ghost {
+        background: transparent;
+        color: var(--text);
+        border: 1px solid var(--ring);
+        box-shadow: none;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 8px;
+      }
+      thead th {
+        font-size: 0.8rem;
+        color: var(--muted);
+        font-weight: 600;
+        padding: 0.4rem 0.6rem;
+        text-align: right;
+      }
+      tbody td {
+        background: var(--panel);
+        border: 1px solid var(--ring);
+        padding: 0.6rem 0.6rem;
+      }
+      tbody tr td:first-child {
+        border-start-start-radius: 10px;
+        border-end-start-radius: 10px;
+      }
+      tbody tr td:last-child {
+        border-start-end-radius: 10px;
+        border-end-end-radius: 10px;
+      }
+
+      /* Login overlay */
+      .gate {
+        position: fixed;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(180deg, rgba(2, 6, 23, 0.85), rgba(2, 6, 23, 0.85));
+        backdrop-filter: blur(4px);
+        z-index: 50;
+      }
+      .panel {
+        width: min(440px, 92vw);
+        background: var(--panel);
+        border: 1px solid var(--ring);
+        border-radius: 16px;
+        padding: 1.25rem;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+        animation: pop 0.25s ease;
+      }
+      .panel h2 {
+        margin: 0.25rem 0 1rem;
+      }
+      .field {
+        display: grid;
+        gap: 0.4rem;
+        margin: 0.6rem 0;
+      }
+      .field input {
+        all: unset;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid var(--ring);
+        padding: 0.7rem 0.8rem;
+        border-radius: 12px;
+      }
+      .danger {
+        color: var(--danger);
+        font-size: 0.85rem;
+      }
+      @keyframes pop {
+        from {
+          transform: scale(0.98);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+
+      @media (max-width: 1024px) {
+        .shell {
+          grid-template-columns: 1fr;
+        }
+        .sidebar {
+          display: none;
+        }
+        .search input {
+          width: 160px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell" id="app" style="visibility: hidden">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="logo" aria-hidden></div>
+          <h1>Nijjara ERP</h1>
+        </div>
+        <nav class="nav">
+          <h3>إدارة النظام</h3>
+          <a href="#/sys" data-route="/sys" aria-current="page">نظرة عامة</a>
+          <a href="#/sys/users" data-route="/sys/users">المستخدمون</a>
+          <a href="#/sys/roles" data-route="/sys/roles">الأدوار</a>
+          <a href="#/sys/permissions" data-route="/sys/permissions">الأذونات</a>
+          <a href="#/sys/role-perms" data-route="/sys/role-perms">تعيين أذونات الأدوار</a>
+          <a href="#/sys/properties" data-route="/sys/properties">خصائص المستخدم</a>
+          <a href="#/sys/sessions" data-route="/sys/sessions">الجلسات</a>
+          <a href="#/sys/audit" data-route="/sys/audit">التدقيق</a>
+        </nav>
+      </aside>
+
+      <!-- Main -->
+      <section class="main">
+        <header class="topbar">
+          <div class="search">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-3.5-3.5" />
+            </svg>
+            <input id="q" placeholder="ابحث عن مستخدم…" oninput="UI.onSearch(this.value)" />
+          </div>
+          <div class="user-mini">
+            <span id="meName">—</span>
+            <span class="badge">مسجل</span>
+          </div>
+        </header>
+
+        <div class="content" id="routeContainer">
+          <!-- route content goes here -->
+        </div>
+      </section>
+    </div>
+
+    <!-- Login Gate -->
+    <div class="gate" id="gate">
+      <div class="panel">
+        <div class="brand" style="padding: 0 0 0.5rem 0; border: 0">
+          <div class="logo"></div>
+          <h2>دخول النظام</h2>
+        </div>
+        <p style="margin: 0; color: var(--muted)">الرجاء إدخال اسم المستخدم وكلمة المرور.</p>
+        <div class="field">
+          <label>اسم المستخدم</label><input id="u" autocomplete="username" value="mkhoraiby" />
+        </div>
+        <div class="field">
+          <label>كلمة المرور</label
+          ><input id="p" type="password" autocomplete="current-password" value="210388" />
+        </div>
+        <div class="danger" id="err" hidden></div>
+        <div style="display: flex; gap: 0.6rem; margin-top: 0.8rem">
+          <button class="btn" onclick="Auth.login()">تسجيل الدخول</button>
+          <button class="btn ghost" onclick="Auth.clear()">مسح</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // --- Minimal client app (no frameworks) ---
+      const S = {
+        me: null,
+        rows: [],
+        route: '/sys',
+      };
+
+      const UI = {
+        init() {
+          document.getElementById('app').style.visibility = 'visible';
+          this.bindRouter();
+        },
+        bindRouter() {
+          const nav = document.querySelectorAll('.nav a');
+          nav.forEach((a) =>
+            a.addEventListener('click', (e) => {
+              nav.forEach((x) => x.removeAttribute('aria-current'));
+              a.setAttribute('aria-current', 'page');
+              S.route = a.getAttribute('data-route');
+              UI.render();
+            })
+          );
+          this.render();
+        },
+        render() {
+          const el = document.getElementById('routeContainer');
+          if (S.route === '/sys') return this.renderOverview(el);
+          if (S.route === '/sys/users') return this.renderUsers(el);
+          el.innerHTML = UI.stub('قريباً', 'هذه الشاشة ستكون جاهزة في الخطوة التالية.');
+        },
+        stub(title, body) {
+          return `<div class="card"><h3 style="margin:.25rem 0 1rem">${title}</h3><p style="color:var(--muted)">${body}</p>
+        <div class="toolbar" style="margin-top:1rem">
+          <button class="btn" disabled>زر تجريبي</button>
+          <button class="btn ghost" disabled>قائمة</button>
+        </div>
+      </div>`;
+        },
+        renderOverview(el) {
+          const kpi = (label, n) =>
+            `<div class="card kpi"><div><div style="color:var(--muted);font-size:.85rem">${label}</div><div class="n">${n}</div></div><div style="opacity:.5">📊</div></div>`;
+          el.innerHTML = `
+        <div class="grid">
+          <div class="col" style="grid-column: span 3">${kpi('إجمالي المستخدمين', S.meta?.totalUsers ?? '—')}</div>
+          <div class="col" style="grid-column: span 3">${kpi('المستخدمون النشطون', S.meta?.activeUsers ?? '—')}</div>
+          <div class="col" style="grid-column: span 3">${kpi('الأدوار', S.meta?.roles ?? '—')}</div>
+          <div class="col" style="grid-column: span 3">${kpi('أذونات', S.meta?.permissions ?? '—')}</div>
+        </div>
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.6rem">
+            <h3 style="margin:0">دليل المستخدمين</h3>
+            <div class="toolbar">
+              <button class="btn" disabled>تصدير</button>
+              <button class="btn ghost" disabled>تفعيل</button>
+              <button class="btn ghost" disabled>تعطيل</button>
+            </div>
+          </div>
+          <div id="usersTable">${UI.table(S.rows)}</div>
+        </div>`;
+        },
+        renderUsers(el) {
+          el.innerHTML = `
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.6rem">
+            <h3 style="margin:0">المستخدمون</h3>
+            <div class="toolbar">
+              <button class="btn" disabled>مستخدم جديد</button>
+              <button class="btn ghost" disabled>تعيين دور</button>
+              <button class="btn ghost" disabled>إعادة كلمة المرور</button>
+            </div>
+          </div>
+          <div id="usersTable">${UI.table(S.rows)}</div>
+        </div>`;
+        },
+        table(rows) {
+          if (!rows || !rows.length) return `<div style="color:var(--muted)">لا توجد بيانات.</div>`;
+          const headers = [
+            'رقم',
+            'الاسم الكامل',
+            'اسم المستخدم',
+            'البريد الإلكتروني',
+            'القسم',
+            'الدور',
+            'نشط؟',
+            'آخر دخول',
+            'آخر تحديث',
+            'إجراءات',
+          ];
+          const toCell = (v) => `<td>${v ?? ''}</td>`;
+          const body = rows
+            .map(
+              (r) => `
+        <tr>
+          ${toCell(r.User_Id)}
+          ${toCell(r.Full_Name)}
+          ${toCell(r.Username)}
+          ${toCell(r.Email)}
+          ${toCell(r.Department_AR || r.Department)}
+          ${toCell(r.Role_AR || r.Role_Id)}
+          ${toCell(r.IsActive ? 'نعم' : 'لا')}
+          ${toCell(r.Last_Login || '')}
+          ${toCell(r.Updated_At || '')}
+          <td>
+            <div class="toolbar">
+              <button class="btn" disabled>عرض</button>
+              <button class="btn ghost" disabled>تعديل</button>
+              <button class="btn ghost" disabled>تعطيل/تفعيل</button>
+              <button class="btn ghost" disabled>كلمة المرور</button>
+              <button class="btn ghost" disabled>تعيين دور</button>
+              <button class="btn ghost" disabled>حذف</button>
+              <button class="btn ghost" disabled>انتحال</button>
+              <button class="btn ghost" disabled>مستندات</button>
+            </div>
+          </td>
+        </tr>`
+            )
+            .join('');
+          const head = `<thead><tr>${headers.map((h) => `<th>${h}</th>`).join('')}</tr></thead>`;
+          return `<table>${head}<tbody>${body}</tbody></table>`;
+        },
+        onSearch(q) {
+          if (!S.rowsRaw) return;
+          const Q = q.trim().toLowerCase();
+          S.rows = S.rowsRaw.filter((r) => {
+            const s = [r.Full_Name, r.Username, r.Email, r.Department, r.Role_Id]
+              .join('|')
+              .toLowerCase();
+            return !Q || s.includes(Q);
+          });
+          UI.render();
+        },
+      };
+
+      const Auth = {
+        clear() {
+          document.getElementById('u').value = '';
+          document.getElementById('p').value = '';
+        },
+        login() {
+          const u = document.getElementById('u').value.trim();
+          const p = document.getElementById('p').value;
+          document.getElementById('err').hidden = true;
+          if (!u || !p) {
+            return Auth.fail('يرجى إدخال اسم المستخدم وكلمة المرور.');
+          }
+          if (typeof google !== 'undefined' && google.script && google.script.run) {
+            google.script.run
+              .withSuccessHandler(App.onLoginOk)
+              .withFailureHandler((e) => Auth.fail(e.message || 'فشل الدخول'))
+              .loginAndGetData(u, p, {});
+          } else {
+            // Local fallback (preview only) — accepts mkhoraiby / 210388
+            if (u === 'mkhoraiby' && p === '210388') {
+              const demo = App._demoPayload();
+              App.onLoginOk(demo);
+            } else {
+              Auth.fail('بيانات الدخول غير صحيحة.');
+            }
+          }
+        },
+        fail(msg) {
+          const el = document.getElementById('err');
+          el.textContent = msg;
+          el.hidden = false;
+        },
+      };
+
+      const App = {
+        onLoginOk(payload) {
+          S.me = payload.currentUser || { fullName: 'المستخدم' };
+          S.meta = payload.systemOverview || {};
+          document.getElementById('meName').textContent = S.me.fullName || S.me.userId || '—';
+          const gate = document.getElementById('gate');
+          gate.style.display = 'none';
+          // users table
+          const d = (payload.rows || payload.users || []).map((x) => x); // compatibility
+          if (payload.rows && payload.rows.length) {
+            S.rowsRaw = payload.rows;
+            S.rows = payload.rows;
+          } else if (payload.directory && payload.directory.length) {
+            S.rowsRaw = payload.directory;
+            S.rows = payload.directory;
+          } else {
+            S.rowsRaw = [];
+            S.rows = [];
+          }
+          UI.init();
+        },
+        _demoPayload() {
+          return {
+            currentUser: {
+              userId: 'USR_00001',
+              fullName: 'Mohamed Khoraiby',
+              email: 'mkhoraiby@example.com',
+              roleId: 'Admin',
+              department: 'HQ',
+            },
+            roles: [{ Role_Id: 'Admin', Role_Title: 'Administrator' }],
+            permissions: [{ Permission_Key: 'SYS_VIEW', Allowed: true, Scope: 'GLOBAL' }],
+            systemOverview: {
+              totalUsers: 3,
+              activeUsers: 3,
+              roles: 3,
+              permissions: 24,
+              pendingPasswordResets: 0,
+            },
+            rows: [
+              {
+                User_Id: 'USR_00001',
+                Full_Name: 'Mohamed Khoraiby',
+                Username: 'mkhoraiby',
+                Email: 'm.k@example.com',
+                Department: 'HQ',
+                Department_AR: 'الإدارة العليا',
+                Role_Id: 'Admin',
+                Role_AR: 'المدير',
+                IsActive: true,
+                Last_Login: '2025-01-09',
+                Updated_At: '2025-01-09',
+              },
+              {
+                User_Id: 'USR_00002',
+                Full_Name: 'Omar Y.',
+                Username: 'omar',
+                Email: 'omar@example.com',
+                Department: 'Projects',
+                Department_AR: 'المشاريع',
+                Role_Id: 'Manager',
+                Role_AR: 'مدير',
+                IsActive: true,
+                Last_Login: '',
+                Updated_At: '2025-01-07',
+              },
+              {
+                User_Id: 'USR_00003',
+                Full_Name: 'Sara H.',
+                Username: 'sara',
+                Email: 'sara@example.com',
+                Department: 'Production',
+                Department_AR: 'الإنتاج',
+                Role_Id: 'User',
+                Role_AR: 'مستخدم أساسي',
+                IsActive: true,
+                Last_Login: '',
+                Updated_At: '2025-01-06',
+              },
+            ],
+          };
+        },
+      };
+    </script>
+  </body>
+</html>
