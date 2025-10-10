@@ -1072,19 +1072,19 @@
             <div class="form-grid">
               <div class="form-group">
                 <label for="add-Full_Name">الاسم الكامل</label>
-                <input type="text" id="add-Full_Name" name="Full_Name" required />
+                <input type="text" id="add-Full_Name" name="Full_Name" required disabled />
               </div>
               <div class="form-group">
                 <label for="add-Email">البريد الإلكتروني</label>
-                <input type="email" id="add-Email" name="Email" required />
+                <input type="email" id="add-Email" name="Email" required disabled />
               </div>
               <div class="form-group">
                 <label for="add-Username">اسم المستخدم</label>
-                <input type="text" id="add-Username" name="Username" required />
+                <input type="text" id="add-Username" name="Username" required disabled />
               </div>
               <div class="form-group">
                 <label for="add-Role_Id">الدور</label>
-                <select id="add-Role_Id" name="Role_Id" required></select>
+                <select id="add-Role_Id" name="Role_Id" required disabled></select>
               </div>
             </div>
           </div>
@@ -1110,19 +1110,19 @@
             <div class="form-grid">
               <div class="form-group">
                 <label for="edit-Full_Name">الاسم الكامل</label>
-                <input type="text" id="edit-Full_Name" name="Full_Name" required />
+                <input type="text" id="edit-Full_Name" name="Full_Name" required disabled />
               </div>
               <div class="form-group">
                 <label for="edit-Email">البريد الإلكتروني</label>
-                <input type="email" id="edit-Email" name="Email" required />
+                <input type="email" id="edit-Email" name="Email" required disabled />
               </div>
               <div class="form-group">
                 <label for="edit-Username">اسم المستخدم</label>
-                <input type="text" id="edit-Username" name="Username" required />
+                <input type="text" id="edit-Username" name="Username" required disabled />
               </div>
               <div class="form-group">
                 <label for="edit-Role_Id">الدور</label>
-                <select id="edit-Role_Id" name="Role_Id" required></select>
+                <select id="edit-Role_Id" name="Role_Id" required disabled></select>
               </div>
             </div>
           </div>
@@ -1280,9 +1280,10 @@
 
         const toast = document.getElementById('toast');
         const showToast = (message, isError = false) => {
-          toast.textContent = message;
-          toast.className = isError ? 'error' : 'success';
-          toast.classList.add('show');
+          if (!toast) return;
+          toast.textContent = message || '';
+          toast.classList.remove('success', 'error', 'show');
+          toast.classList.add(isError ? 'error' : 'success', 'show');
           setTimeout(() => toast.classList.remove('show'), 3000);
         };
         const toggleButtonLoading = (button, isLoading) => {
@@ -1368,7 +1369,17 @@
         const usersCanvas = document.getElementById('sys-users-canvas');
 
         // Dynamic query for users table (may be injected by Users.html)
-        const getUsersTableBody = () => document.querySelector('#users-table tbody');
+        const getUsersTableBody = () => {
+          return (
+            document.querySelector('#users-table tbody') ||
+            document.querySelector('#users-table-wrapper table tbody') ||
+            null
+          );
+        };
+
+        // Navbar guard (avoid classList on null)
+        const navbar = document.getElementById('app-navbar');
+        if (navbar) navbar.classList.remove('hidden');
 
         // --- UTIL ---
         const openModal = (m) => {
@@ -1435,11 +1446,11 @@
         };
 
         // --- RENDER USERS TABLE ---
-        const renderUsersTable = () => {
+        const renderUsersTable = (rows = AppState.users) => {
           const tbody = getUsersTableBody();
           if (!tbody) return;
           tbody.innerHTML = '';
-          AppState.users.forEach((user) => {
+          (Array.isArray(rows) ? rows : []).forEach((user) => {
             const statusValueRaw = user.Status ? String(user.Status).toLowerCase() : '';
             const activeWords = ['active', 'نشط'];
             const inactiveWords = ['inactive', 'موقوف', 'محذوف', 'متوقف'];
@@ -1481,10 +1492,30 @@
                   ${resetBtn}
                 </td>
               </tr>`;
-            const tbody2 = getUsersTableBody();
-            if (tbody2) tbody2.insertAdjacentHTML('beforeend', row);
+            tbody.insertAdjacentHTML('beforeend', row);
           });
         };
+
+        const userSearchInput = document.getElementById('user-search-input');
+        if (userSearchInput) {
+          userSearchInput.addEventListener('input', (e) => {
+            const q = (e.target.value || '').trim().toLowerCase();
+            const base = Array.isArray(AppState.users) ? AppState.users : [];
+            if (!q) {
+              renderUsersTable();
+              return;
+            }
+            const filtered = base.filter(
+              (u) =>
+                String(u.Full_Name || '').toLowerCase().includes(q) ||
+                String(u.Email || '').toLowerCase().includes(q) ||
+                String(u.Username || '').toLowerCase().includes(q) ||
+                String(u.Role_Id || '').toLowerCase().includes(q)
+            );
+            // Render filtered dataset
+            renderUsersTable(filtered);
+          });
+        }
 
         // --- SERVER CALLS ---
         const handleLogin = (e) => {
@@ -1521,7 +1552,6 @@
               checkPermissions();
 
               // FIX: show navbar and route to System → Users
-              const navbar = document.getElementById('app-navbar');
               if (navbar) navbar.classList.remove('hidden');
               switchView('system-management-view');
               setActiveSystemRoute('/sys/users');

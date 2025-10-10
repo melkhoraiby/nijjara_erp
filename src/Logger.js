@@ -1,28 +1,10 @@
-// Logger.js — minimal audit log
+// Logger.js — bridges console + centralized audit sheet
 
-var AUDIT_LOG_SHEET = 'SYS_Audit_Log';
-var AUDIT_HEADERS = [
-  'Audit_Id',
-  'Actor_Id',
-  'Sheet_Name',
-  'Action',
-  'Target_Id',
-  'Details_JSON',
-  'Created_At',
-];
-
-function logAction(actorId, sheetName, action, targetId, details) {
-  var sh = ensureHeaders(AUDIT_LOG_SHEET, AUDIT_HEADERS);
-  var id = 'AUD_' + zeroPad(sh.getLastRow(), 5);
-  var row = [
-    id,
-    actorId || 'SYSTEM',
-    sheetName || '',
-    action || '',
-    targetId || '',
-    safeJsonStringify(details),
-    ensureISODate(new Date()),
-  ];
-  sh.appendRow(row);
-  return id;
+function appLog(context, action, details = {}) {
+  console.log(`${context} → ${action}`, details);
+  try {
+    logAction(context, action, details); // implemented in Sys_Audit.js
+  } catch (e) {
+    console.error('Audit log failed:', e);
+  }
 }

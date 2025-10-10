@@ -1,40 +1,24 @@
-/**
- * Code.js — Main entry point
- * - Serves Dashboard.html
- * - Exposes small helpers used by the UI
- */
+// Global variable for Spreadsheet ID
+const SPREADSHEET_ID = '1g3a_f_D4A8z-7yS0gq4cu-2de2z1DkqkBC8k2lA7DqM';
 
-function doGet() {
-  var template = HtmlService.createTemplateFromFile('Dashboard.html');
-  return template
+/**
+ * Serves the main HTML page of the web app.
+ * @param {object} e - The event parameter for a simple get request.
+ * @returns {HtmlOutput} The main page of the web app.
+ */
+function doGet(e) {
+  return HtmlService.createTemplateFromFile('Dashboard')
     .evaluate()
     .setTitle('Nijjara ERP')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1');
 }
 
-/** Include HTML partials */
-function include(filename) {
-  if (!filename) return '';
-  return HtmlService.createHtmlOutputFromFile(filename).getContent();
-}
-
 /**
- * Minimal API used by the front-end
+ * Includes the content of another HTML file.
+ * This is a utility function for templated HTML.
+ * @param {string} filename - The name of the HTML file to include.
+ * @returns {string} The content of the HTML file.
  */
-function api_login(username, password) {
-  return loginAndGetData(username, password, { device: 'WEB', ipAddress: '', authToken: '' });
-}
-
-function api_getOverview() {
-  return getUsersOverviewSummary();
-}
-
-function api_getUsers(state) {
-  state = state || {}; // {q, roleId, department, status}
-  return listUsers({
-    isActive: state.status === true ? true : state.status === false ? false : undefined,
-    roleId: state.roleId,
-    department: state.department,
-    search: state.q || '',
-  });
+function include(filename) {
+  return HtmlService.createHtmlOutputFromFile(filename).getContent();
 }
