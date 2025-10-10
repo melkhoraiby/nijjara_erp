@@ -1,0 +1,188 @@
+<div class="users-panel" dir="rtl" style="padding:16px">
+  <div class="toolbar" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <input
+      id="UserSearch"
+      type="text"
+      placeholder="ابحث بالاسم، اسم المستخدم، البريد، القسم، الدور..."
+      style="flex:1; padding:10px; border:1px solid #333; border-radius:10px"
+    />
+    <select id="FilterDepartment" style="padding:8px;border:1px solid #333;border-radius:10px">
+      <option value="">كل الأقسام</option>
+    </select>
+    <select id="FilterRole" style="padding:8px;border:1px solid #333;border-radius:10px">
+      <option value="">كل الأدوار</option>
+    </select>
+    <select id="FilterStatus" style="padding:8px;border:1px solid #333;border-radius:10px">
+      <option value="">الكل</option>
+      <option value="TRUE">نشط</option>
+      <option value="FALSE">غير نشط</option>
+    </select>
+  </div>
+
+  <div id="UsersMeta" style="margin:10px 0; font-size:12px; opacity:.8"></div>
+
+  <table id="UsersTable" style="width:100%; border-collapse:collapse; margin-top:6px">
+    <thead>
+      <tr style="text-align:right">
+        <th>رقم المستخدم</th>
+        <th>الاسم الكامل</th>
+        <th>اسم المستخدم</th>
+        <th>البريد الإلكتروني</th>
+        <th>القسم</th>
+        <th>الدور</th>
+        <th>نشط؟</th>
+        <th>آخر دخول</th>
+        <th>إجراءات</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <div style="display:flex;justify-content:space-between; margin-top:10px">
+    <button id="PrevPage">السابق</button>
+    <div id="PageInfo"></div>
+    <button id="NextPage">التالي</button>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const qs = (selector) => document.querySelector(selector);
+
+    const state = {
+      q: '',
+      dept: '',
+      role: '',
+      status: '',
+      limit: 25,
+      offset: 0,
+      sort: 'Updated_At',
+      dir: 'desc',
+    };
+    let debounceTimer;
+
+    function debounce(fn, ms) {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(fn, ms);
+    }
+
+    function initFilters() {
+      google.script.run
+        .withSuccessHandler(({ departments, roles }) => {
+          const depSel = qs('#FilterDepartment');
+          const roleSel = qs('#FilterRole');
+
+          departments.forEach((dep) => {
+            const option = document.createElement('option');
+            option.value = dep.value;
+            option.textContent = dep.label;
+            depSel.appendChild(option);
+          });
+
+          roles.forEach((role) => {
+            const option = document.createElement('option');
+            option.value = role.value;
+            option.textContent = role.label;
+            roleSel.appendChild(option);
+          });
+        })
+        .apiGetUsersFilters();
+
+      qs('#UserSearch').addEventListener('input', () =>
+        debounce(() => {
+          state.q = qs('#UserSearch').value.trim();
+          state.offset = 0;
+          fetchUsers();
+        }, 200)
+      );
+      qs('#FilterDepartment').addEventListener('change', () => {
+        state.dept = qs('#FilterDepartment').value;
+        state.offset = 0;
+        fetchUsers();
+      });
+      qs('#FilterRole').addEventListener('change', () => {
+        state.role = qs('#FilterRole').value;
+        state.offset = 0;
+        fetchUsers();
+      });
+      qs('#FilterStatus').addEventListener('change', () => {
+        state.status = qs('#FilterStatus').value;
+        state.offset = 0;
+        fetchUsers();
+      });
+      qs('#PrevPage').addEventListener('click', () => {
+        state.offset = Math.max(0, state.offset - state.limit);
+        fetchUsers();
+      });
+      qs('#NextPage').addEventListener('click', () => {
+        state.offset += state.limit;
+        fetchUsers();
+      });
+    }
+
+    function fetchUsers() {
+      google.script.run.withSuccessHandler(renderUsers).apiGetUsers(state);
+    }
+
+    function renderUsers(response) {
+      const rows = Array.isArray(response && response.rows) ? response.rows : [];
+      const total = typeof response?.total === 'number' ? response.total : Number(response?.total) || 0;
+      const offset = typeof response?.offset === 'number' ? response.offset : Number(response?.offset) || 0;
+      const limitRaw =
+        typeof response?.limit === 'number' ? response.limit : Number(response?.limit) || state.limit;
+      const limit = limitRaw > 0 ? limitRaw : state.limit || 1;
+      const tbody = qs('#UsersTable tbody');
+      tbody.innerHTML = '';
+
+      rows.forEach((user) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${user.User_Id}</td>
+          <td>${highlight(user.Full_Name)}</td>
+          <td>${highlight(user.Username)}</td>
+          <td>${highlight(user.Email)}</td>
+          <td>${user.Department_AR || user.Department || ''}</td>
+          <td>${user.Role_AR || user.Role_Id || ''}</td>
+          <td>${user.IsActive ? 'نشط' : 'غير نشط'}</td>
+          <td>${user.Last_Login || ''}</td>
+          <td>
+            <button onclick="window._userAction('view','${user.User_Id}')">عرض</button>
+            <button onclick="window._userAction('edit','${user.User_Id}')">تعديل</button>
+            <button onclick="window._userAction('toggle','${user.User_Id}')">${user.IsActive ? 'تعطيل' : 'تفعيل'}</button>
+            <button onclick="window._userAction('reset','${user.User_Id}')">إعادة كلمة المرور</button>
+            <button onclick="window._userAction('role','${user.User_Id}')">تعيين دور</button>
+            <button onclick="window._userAction('delete','${user.User_Id}')">حذف</button>
+            <button onclick="window._userAction('impersonate','${user.User_Id}')">انتحال</button>
+            <button onclick="window._userAction('docs','${user.User_Id}')">مستندات</button>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+
+      const rangeStart = total ? Math.min(total, offset + 1) : 0;
+      const rangeEnd = total ? Math.min(total, offset + rows.length) : 0;
+      qs('#UsersMeta').textContent = total
+        ? `النتائج: ${rangeStart}–${rangeEnd} من ${total}`
+        : 'لا توجد سجلات مطابقة';
+      qs('#PageInfo').textContent = total ? `صفحة ${Math.floor(offset / limit) + 1}` : 'صفحة 0';
+    }
+
+    function highlight(value) {
+      if (!state.q || !value) return value || '';
+      try {
+        const safe = state.q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const pattern = new RegExp(`(${safe})`, 'ig');
+        return String(value).replace(pattern, '<mark>$1</mark>');
+      } catch (err) {
+        return value;
+      }
+    }
+
+    window._userAction = function (type, userId) {
+      google.script.run.uiHandleUserAction(type, userId);
+    };
+
+    initFilters();
+    fetchUsers();
+  })();
+</script>
