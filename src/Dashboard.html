@@ -1409,23 +1409,47 @@
           });
         });
 
+        const resolveRolesErrorMessage = (payload, fallbackMessage) => {
+          if (!payload) return fallbackMessage;
+          if (typeof payload === 'string') return payload;
+          if (typeof payload === 'object') {
+            return (
+              payload.errorMessage ||
+              payload.message ||
+              payload.error ||
+              payload.details ||
+              fallbackMessage
+            );
+          }
+          return fallbackMessage;
+        };
+
         const populateRoleDropdowns = () => {
           const createOption = (role) =>
             `<option value="${role.Role_Id}">${role.Role_Title}</option>`;
-          const optionsHTML = (AppState.roles || []).map(createOption).join('');
+          const currentRoles = Array.isArray(AppState.roles) ? AppState.roles : [];
+          const optionsHTML = currentRoles.map(createOption).join('');
           if (addUserRoleSelect) addUserRoleSelect.innerHTML = optionsHTML;
           if (editUserRoleSelect) editUserRoleSelect.innerHTML = optionsHTML;
         };
         const ensureRolesLoaded = (cb) => {
-          if (AppState.roles && AppState.roles.length) {
+          if (Array.isArray(AppState.roles) && AppState.roles.length) {
             populateRoleDropdowns();
             cb && cb();
             return;
           }
           google.script.run
             .withSuccessHandler((roles) => {
-              AppState.roles = roles || [];
-              populateRoleDropdowns();
+              if (Array.isArray(roles)) {
+                AppState.roles = roles;
+                populateRoleDropdowns();
+              } else {
+                const errorMessage = resolveRolesErrorMessage(
+                  roles,
+                  'فشل تحميل الأدوار'
+                );
+                showToast(errorMessage, true);
+              }
               cb && cb();
             })
             .withFailureHandler((error) => {
@@ -1533,13 +1557,30 @@
               }
 
               AppState.currentUser = payload.currentUser;
-              AppState.roles = payload.roles || [];
+              if (Array.isArray(payload.roles)) {
+                AppState.roles = payload.roles;
+                populateRoleDropdowns();
+              } else if (typeof payload.roles !== 'undefined') {
+                const errorMessage = resolveRolesErrorMessage(
+                  payload.roles,
+                  'فشل تحميل الأدوار'
+                );
+                showToast(errorMessage, true);
+              }
               fetchAllUsers();
 
               google.script.run
                 .withSuccessHandler((roles) => {
-                  AppState.roles = roles || [];
-                  populateRoleDropdowns();
+                  if (Array.isArray(roles)) {
+                    AppState.roles = roles;
+                    populateRoleDropdowns();
+                  } else {
+                    const errorMessage = resolveRolesErrorMessage(
+                      roles,
+                      'فشل تحميل الأدوار'
+                    );
+                    showToast(errorMessage, true);
+                  }
                 })
                 .withFailureHandler((error) => {
                   showToast(error.message || 'فشل تحميل الأدوار', true);
