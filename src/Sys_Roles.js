@@ -1,5 +1,5 @@
 // Sys_Roles.js — role and permission management
-// Works with sheets: SYS_Roles, SYS_Permissions, SYS_RolePermissions
+// Works with sheets: SYS_Roles, SYS_Permissions, SYS_Role_Permissions
 
 /**
  * Get all roles for dropdowns and management UI.
@@ -60,7 +60,7 @@ function assignRolePermissions(roleId, permissionKeys = []) {
     if (!hasPermission('SYS_ASSIGN_PERMISSIONS')) {
       return { success: false, error: 'Access denied to assign permissions.' };
     }
-    const rolePermsSheet = 'SYS_RolePermissions';
+    const rolePermsSheet = 'SYS_Role_Permissions';
     const existing = _getRows(rolePermsSheet).filter((r) => r.Role_Id === roleId);
     existing.forEach((r) => _deleteRow(rolePermsSheet, 'RolePerm_Id', r.RolePerm_Id));
 
