@@ -4,6 +4,111 @@
     <base target="_top">
   </head>
   <body>
-    
+    <script>
+      // --- NAVBAR BUTTONS → SWITCH VIEWS (keep Arabic labels) ---
+      (() => {
+        const navButtons = document.querySelectorAll('.app-navbar .nav-btn[data-target]');
+        if (!navButtons.length) return;
+        navButtons.forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const target = btn.getAttribute('data-target');
+            if (!target) return;
+            // system management uses hash routing for subtabs
+            if (target === 'system-management-view') {
+              switchView('system-management-view');
+              setActiveSystemRoute('/sys');
+            } else {
+              switchView(target);
+            }
+            navButtons.forEach((b) => b.classList.remove('active'));
+            btn.classList.add('active');
+          });
+        });
+      })();
+
+      // --- ENSURE ROUTER APPLIES LABELS FROM DOM ---
+      (() => {
+        if (!window.__sysRouterReady) {
+          window.__sysRouterReady = true;
+
+          const sysSidebarLinks = Array.from(
+            document.querySelectorAll('.system-sidebar .sidebar-link[data-route]')
+          );
+          const sysSections = Array.from(
+            document.querySelectorAll('.system-content .system-section[data-route]')
+          );
+
+          // Build/refresh route map from DOM
+          const routeMap = {};
+          sysSections.forEach((section) => {
+            const route = section.dataset.route;
+            if (!route) return;
+            const label =
+              section.dataset.label ||
+              (section.querySelector('.section-header h2')
+                ? section.querySelector('.section-header h2').textContent.trim()
+                : '');
+            routeMap[route] = { section, label, route };
+          });
+
+          // Update active section + sidebar + section header text if needed
+          const applyRoute = (route) => {
+            const conf = routeMap[route] || routeMap['/sys'];
+            if (!conf) return;
+            const activeRoute = conf.route;
+            sysSections.forEach((section) => {
+              section.classList.toggle('active', section.dataset.route === activeRoute);
+            });
+            sysSidebarLinks.forEach((btn) => {
+              btn.classList.toggle('active', btn.dataset.route === activeRoute);
+            });
+            // Make sure the visible section header shows the Arabic label
+            const header = conf.section.querySelector('.section-header h2');
+            if (header && conf.label) header.textContent = conf.label;
+          };
+
+          // Sync on hash
+          const readHashRoute = () => {
+            const raw = (window.location.hash || '').replace(/^#/, '');
+            return routeMap[raw] ? raw : '/sys';
+          };
+
+          window.addEventListener('hashchange', () => {
+            applyRoute(readHashRoute());
+          });
+
+          // Initial apply if we're already on the System view
+          if (document.getElementById('system-management-view')?.classList.contains('active')) {
+            applyRoute(readHashRoute());
+          }
+
+          // Sidebar clicks set the hash (source of truth)
+          sysSidebarLinks.forEach((btn) => {
+            btn.addEventListener('click', (e) => {
+              e.preventDefault();
+              const route = btn.dataset.route || '/sys';
+              if (window.location.hash !== `#${route}`) {
+                window.location.hash = `#${route}`;
+              } else {
+                applyRoute(route); // already same, still apply
+              }
+            });
+          });
+
+          // Expose a helper for post-login navigation
+          window.__goToSystemUsers = () => {
+            switchView('system-management-view');
+            const target = '/sys/users';
+            if (window.location.hash !== `#${target}`) {
+              window.location.hash = `#${target}`;
+            } else {
+              applyRoute(target);
+            }
+            const navbar = document.getElementById('app-navbar');
+            if (navbar) navbar.classList.remove('hidden');
+          };
+        }
+      })();
+    </script>
   </body>
 </html>
