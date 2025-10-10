@@ -1,114 +1,1829 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="ar" dir="rtl">
   <head>
-    <base target="_top">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nijjara ERP - Workspace Demo (Fixed)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --color-bg: #121212;
+        --color-bg-panel: #1e1e1e;
+        --color-border: rgba(255, 255, 255, 0.1);
+        --color-text-primary: #f0f0f0;
+        --color-text-secondary: #a0a0a0;
+        --color-accent: #d4af37;
+        --color-accent-dark: #a48722;
+        --color-success: #2ecc71;
+        --color-danger: #e74c3c;
+        --font-family-arabic: 'Cairo', sans-serif;
+        /* FIX: was missing */
+        --color-input-bg: rgba(0, 0, 0, 0.35);
+      }
+
+      /* --- Skeleton Loading --- */
+      .skeleton {
+        background: linear-gradient(90deg, #222 25%, #333 50%, #222 75%);
+        background-size: 200% 100%;
+        animation: skeleton-loading 1.2s infinite linear;
+        border-radius: 6px;
+        display: inline-block;
+      }
+      @keyframes skeleton-loading {
+        0% {
+          background-position: 200% 0;
+        }
+        100% {
+          background-position: -200% 0;
+        }
+      }
+      .skeleton-text {
+        height: 18px;
+        margin: 0 0.5rem;
+      }
+      .skeleton-badge {
+        height: 18px;
+        width: 50px;
+        margin: 0 0.5rem;
+      }
+      .skeleton-actions {
+        height: 18px;
+        width: 100px;
+        margin: 0 0.5rem;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        height: 100%;
+        overflow: hidden;
+        font-family: var(--font-family-arabic);
+        background-color: var(--color-bg);
+        color: var(--color-text-primary);
+      }
+
+      /* --- View Management & Transitions --- */
+      .view {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        visibility: hidden;
+        transition:
+          opacity 0.5s ease,
+          visibility 0.5s;
+      }
+      .view.active {
+        opacity: 1;
+        visibility: visible;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: scale(0.95);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      /* --- Login Screen --- */
+      #login-screen {
+        display: grid;
+        place-content: center;
+        background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"%3E%3Cg fill-rule="evenodd"%3E%3Cg fill="%232a2a2a" fill-opacity="0.2"%3E%3Cpath opacity=".5" d="M96 95h4v1h-4v-1zm-7 5h1v4h-1v-4zm-7 0h1v4h-1v-4zm-7 0h1v4h-1v-4zm-7 0h1v4h-1v-4zM54 95h1v4h-1v-4zm-7 0h1v4h-1v-4zm-7 0h1v4h-1v-4zm-7 0h1v4h-1v-4zm-7 0h1v4h-1v-4zM9 95h1v4h-1v-4zm-7 0h1v4H2v-4zM95 0h1v4h-1V0zM2 0h1v4H2V0z"/%3E%3Cpath d="M6 95h4v1H6v-1zM4 95h1v4H4v-4zM95 6h1v4h-1V6zM95 4h1v1h-1V4z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');
+      }
+      .login-container {
+        width: 400px;
+        padding: 3rem;
+        border: 1px solid var(--color-border);
+        border-radius: 12px;
+        background: rgba(30, 30, 30, 0.8);
+        backdrop-filter: blur(10px);
+        animation: fadeIn 1s ease-out;
+      }
+      .logo {
+        font-size: 2.5rem;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+      .logo span {
+        color: var(--color-accent);
+        font-weight: 400;
+      }
+      .form-group {
+        margin-bottom: 1.5rem;
+        text-align: right;
+      }
+      .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        color: var(--color-text-secondary);
+      }
+      .form-group input,
+      .form-group select {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        background-color: rgba(0, 0, 0, 0.3);
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        color: var(--color-text-primary);
+        font-family: var(--font-family-arabic);
+        font-size: 1rem;
+        transition:
+          border-color 0.3s,
+          box-shadow 0.3s;
+      }
+      .form-group input:focus,
+      .form-group select:focus {
+        outline: none;
+        border-color: var(--color-accent);
+        box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+      }
+      .main-button {
+        width: 100%;
+        padding: 0.9rem 1.2rem;
+        background: linear-gradient(160deg, rgba(212, 175, 55, 0.92), rgba(164, 135, 34, 0.85));
+        color: #111;
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        border-radius: 14px;
+        font-family: var(--font-family-arabic);
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        position: relative;
+        transition:
+          transform 0.25s ease,
+          box-shadow 0.25s ease,
+          border-color 0.25s ease;
+        box-shadow:
+          0 16px 32px rgba(0, 0, 0, 0.45),
+          inset 0 1px 0 rgba(255, 255, 255, 0.35);
+        backdrop-filter: blur(8px);
+      }
+      .main-button:hover {
+        transform: translateY(-4px);
+        border-color: rgba(255, 255, 255, 0.45);
+        box-shadow:
+          0 24px 40px rgba(0, 0, 0, 0.55),
+          inset 0 1px 0 rgba(255, 255, 255, 0.45);
+      }
+      .main-button:active {
+        transform: translateY(-1px);
+        box-shadow:
+          0 10px 22px rgba(0, 0, 0, 0.5),
+          inset 0 2px 6px rgba(0, 0, 0, 0.3);
+      }
+      .main-button .spinner {
+        display: none;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 20px;
+        height: 20px;
+        border: 2px solid #000;
+        border-top-color: transparent;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+      .main-button.loading .spinner {
+        display: block;
+      }
+      .main-button.loading span {
+        visibility: hidden;
+      }
+      @keyframes spin {
+        to {
+          transform: translate(-50%, -50%) rotate(360deg);
+        }
+      }
+
+      /* --- Portal / Launchpad View --- */
+      #portal-view {
+        padding: 4rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .portal-header {
+        text-align: center;
+        margin-bottom: 3rem;
+      }
+      .module-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 2rem;
+      }
+      .module-card {
+        --card-primary: rgba(36, 36, 36, 0.92);
+        --card-secondary: rgba(17, 17, 17, 0.85);
+        --card-border: rgba(255, 255, 255, 0.1);
+        --card-glow: rgba(255, 255, 255, 0.08);
+        position: relative;
+        padding: 2.2rem 1.8rem;
+        background: linear-gradient(160deg, var(--card-primary), var(--card-secondary));
+        border: 1px solid var(--card-border);
+        border-radius: 18px;
+        text-align: center;
+        cursor: pointer;
+        color: var(--color-text-primary);
+        transition:
+          transform 0.35s ease,
+          box-shadow 0.35s ease,
+          border-color 0.35s ease;
+        box-shadow:
+          0 22px 38px rgba(0, 0, 0, 0.55),
+          inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(12px);
+        overflow: hidden;
+      }
+      .module-card::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.1), transparent 60%);
+        opacity: 0;
+        transition: opacity 0.35s ease;
+      }
+      .module-card:hover {
+        transform: translateY(-12px);
+        border-color: var(--card-glow);
+        box-shadow:
+          0 32px 52px rgba(0, 0, 0, 0.7),
+          inset 0 1px 0 rgba(255, 255, 255, 0.12);
+      }
+      .module-card:hover::before {
+        opacity: 1;
+      }
+      .module-card h2 {
+        font-size: 1.55rem;
+        letter-spacing: 0.5px;
+      }
+      .module-card[data-theme='projects'] {
+        --card-primary: rgba(40, 52, 82, 0.92);
+        --card-secondary: rgba(22, 30, 50, 0.88);
+        --card-border: rgba(90, 140, 255, 0.32);
+        --card-glow: rgba(90, 140, 255, 0.42);
+      }
+      .module-card[data-theme='finance'] {
+        --card-primary: rgba(55, 45, 26, 0.92);
+        --card-secondary: rgba(34, 28, 16, 0.88);
+        --card-border: rgba(210, 170, 80, 0.35);
+        --card-glow: rgba(210, 170, 80, 0.45);
+      }
+      .module-card[data-theme='hr'] {
+        --card-primary: rgba(36, 54, 48, 0.92);
+        --card-secondary: rgba(19, 33, 28, 0.88);
+        --card-border: rgba(102, 214, 168, 0.3);
+        --card-glow: rgba(102, 214, 168, 0.38);
+      }
+      .module-card[data-theme='users'] {
+        --card-primary: rgba(46, 33, 52, 0.92);
+        --card-secondary: rgba(27, 18, 32, 0.88);
+        --card-border: rgba(200, 110, 210, 0.32);
+        --card-glow: rgba(200, 110, 210, 0.42);
+      }
+
+      /* --- Workspace View / System Management --- */
+      .workspace {
+        height: 100vh;
+        display: grid;
+        grid-template-columns: 1fr 280px;
+        grid-template-rows: auto 1fr;
+        grid-template-areas: 'header header' 'content nav';
+        padding: 2rem;
+        gap: 2rem;
+        transform: scale(1.1);
+        transition:
+          transform 0.5s ease-out,
+          opacity 0.5s ease-out;
+      }
+      .view.active .workspace {
+        transform: scale(1);
+      }
+      .workspace-header {
+        grid-area: header;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        font-size: 1.5rem;
+      }
+      .workspace-header .back-to-portal {
+        display: none;
+      }
+      .workspace-content {
+        grid-area: content;
+        overflow-y: auto;
+      }
+
+      /* --- Workspace Action Bar --- */
+      .workspace-nav {
+        grid-area: nav;
+        background: var(--color-bg-panel);
+        border: 1px solid var(--color-border);
+        border-radius: 12px;
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+      }
+      .workspace-nav a {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        border-radius: 8px;
+        text-decoration: none;
+        color: var(--color-text-secondary);
+        transition:
+          background-color 0.2s,
+          color 0.2s;
+      }
+      .workspace-nav a:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+        color: var(--color-text-primary);
+      }
+      .workspace-nav a.active {
+        background-color: var(--color-accent);
+        color: #000;
+        font-weight: 700;
+      }
+
+      /* --- System UI --- */
+      .system-wrapper {
+        height: calc(100vh - 64px);
+        margin-top: 64px;
+        padding: 1.5rem 2.5rem 2rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+      .system-header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+      }
+      .system-header h1 {
+        font-size: 1.8rem;
+      }
+      .system-subtitle {
+        color: var(--color-text-secondary);
+        margin-top: 0.25rem;
+      }
+      .system-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+      .accent-button,
+      .ghost-button,
+      .danger-button {
+        border: 1px solid transparent;
+        border-radius: 8px;
+        padding: 0.55rem 1.2rem;
+        cursor: pointer;
+        font-family: var(--font-family-arabic);
+        font-size: 0.95rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+      }
+      .accent-button {
+        background: var(--color-accent);
+        color: #111;
+      }
+      .accent-button:hover {
+        background: #f4d35b;
+      }
+      .ghost-button {
+        background: transparent;
+        border-color: var(--color-border);
+        color: var(--color-text-secondary);
+      }
+      .ghost-button:hover {
+        color: var(--color-text-primary);
+        border-color: rgba(255, 255, 255, 0.25);
+      }
+      .danger-button {
+        background: #b33939;
+        color: #fff;
+      }
+      .danger-button:hover {
+        background: #d64545;
+      }
+
+      .overview-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1rem;
+      }
+      .overview-card {
+        padding: 1.2rem;
+        border-radius: 12px;
+        background: rgba(30, 30, 30, 0.9);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        transition: transform 0.2s ease;
+      }
+      .overview-card:hover {
+        transform: translateY(-3px);
+      }
+      .overview-card span {
+        color: var(--color-text-secondary);
+        font-size: 0.85rem;
+      }
+      .overview-card strong {
+        font-size: 1.4rem;
+        color: var(--color-text-primary);
+      }
+
+      .system-body {
+        display: grid;
+        grid-template-columns: 220px 1fr;
+        gap: 1.5rem;
+        height: 100%;
+        min-height: 0;
+      }
+      .system-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 1rem;
+        background: rgba(18, 18, 18, 0.85);
+        border: 1px solid var(--color-border);
+        border-radius: 12px;
+      }
+      .sidebar-link {
+        background: transparent;
+        border: none;
+        color: var(--color-text-secondary);
+        text-align: right;
+        padding: 0.6rem 0.75rem;
+        border-radius: 8px;
+        cursor: pointer;
+        transition:
+          background 0.2s ease,
+          color 0.2s ease;
+      }
+      .sidebar-link:hover,
+      .sidebar-link.active {
+        background: rgba(212, 175, 55, 0.15);
+        color: var(--color-accent);
+      }
+      .system-content {
+        background: rgba(18, 18, 18, 0.85);
+        border: 1px solid var(--color-border);
+        border-radius: 12px;
+        padding: 1.25rem;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+      }
+      .system-section {
+        display: none;
+        flex-direction: column;
+        gap: 1rem;
+      }
+      .system-section.active {
+        display: flex;
+      }
+      .system-placeholder {
+        padding: 1.5rem;
+        border: 1px dashed var(--color-border);
+        border-radius: 10px;
+        text-align: center;
+        color: var(--color-text-secondary);
+        background: rgba(0, 0, 0, 0.2);
+      }
+      .section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+      .filters {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+      }
+      .filters input,
+      .filters select {
+        background: rgba(0, 0, 0, 0.35);
+        border: 1px solid var(--color-border);
+        color: var(--color-text-primary);
+        padding: 0.45rem 0.75rem;
+        border-radius: 8px;
+      }
+      .table-wrapper {
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        overflow: hidden;
+        background: rgba(12, 12, 12, 0.8);
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      table thead {
+        background: rgba(255, 255, 255, 0.04);
+      }
+      table th,
+      table td {
+        padding: 0.65rem 0.9rem;
+        text-align: right;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        font-size: 0.9rem;
+      }
+      table tbody tr:hover {
+        background: rgba(255, 255, 255, 0.04);
+      }
+      .row-selected {
+        background: rgba(212, 175, 55, 0.12) !important;
+      }
+      .status-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 72px;
+        padding: 0.25rem 0.6rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+      }
+      .status-pill--active {
+        background: rgba(46, 204, 113, 0.2);
+        color: #2ecc71;
+      }
+      .status-pill--inactive {
+        background: rgba(231, 76, 60, 0.25);
+        color: #e74c3c;
+      }
+      .actions-cell {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+        justify-content: flex-end;
+      }
+      .action-chip {
+        background: rgba(255, 255, 255, 0.08);
+        border: none;
+        color: var(--color-text-primary);
+        font-size: 0.75rem;
+        padding: 0.35rem 0.6rem;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+      .action-chip:hover {
+        background: rgba(212, 175, 55, 0.25);
+        color: var(--color-accent);
+      }
+
+      /* --- Modal with Tabs (new stack ONLY) --- */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition:
+          opacity 0.3s,
+          visibility 0.3s;
+      }
+      .modal-overlay.active {
+        opacity: 1;
+        visibility: visible;
+      }
+      .modal-content {
+        width: 700px;
+        max-width: 90%;
+        background-color: var(--color-bg);
+        border: 1px solid var(--color-border);
+        border-radius: 12px;
+        display: flex;
+        flex-direction: column;
+        transform: scale(0.95);
+        transition: transform 0.3s;
+      }
+      .modal-overlay.active .modal-content {
+        transform: scale(1);
+      }
+      .modal-header {
+        padding: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--color-border);
+      }
+      .modal-title {
+        font-size: 1.5rem;
+      }
+      .close-button {
+        background: none;
+        border: none;
+        color: var(--color-text-secondary);
+        font-size: 1.5rem;
+        cursor: pointer;
+      }
+      .modal-body {
+        padding: 1.5rem;
+      }
+      .modal-footer {
+        padding: 1.5rem;
+        border-top: 1px solid var(--color-border);
+        text-align: left;
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.75rem;
+      }
+
+      .profile-tabs {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+      }
+      .profile-tab {
+        background: rgba(255, 255, 255, 0.05);
+        border: none;
+        color: var(--color-text-secondary);
+        padding: 0.5rem 0.9rem;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+      .profile-tab.active {
+        background: rgba(212, 175, 55, 0.2);
+        color: var(--color-accent);
+      }
+      .profile-pane {
+        display: none;
+        font-size: 0.9rem;
+        color: var(--color-text-primary);
+      }
+      .profile-pane.active {
+        display: block;
+      }
+      .profile-pane table {
+        margin-top: 0.5rem;
+      }
+
+      /* Navbar */
+      .app-navbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: rgba(18, 18, 18, 0.98);
+        border-bottom: 1px solid var(--color-border);
+        padding: 0 2.5rem;
+        z-index: 90;
+        transition: opacity 0.3s ease;
+      }
+      .app-navbar.hidden {
+        display: none;
+      }
+      .app-navbar__left,
+      .app-navbar__right {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+      .app-brand {
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: var(--color-accent);
+      }
+      .navbar-user {
+        color: var(--color-text-secondary);
+        font-size: 0.95rem;
+      }
+      .nav-btn {
+        background: none;
+        border: none;
+        color: var(--color-text-secondary);
+        padding: 0.4rem 0.75rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.95rem;
+        transition:
+          background 0.2s ease,
+          color 0.2s ease;
+      }
+      .nav-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--color-text-primary);
+      }
+      .nav-btn.active {
+        color: var(--color-accent);
+        background: rgba(212, 175, 55, 0.15);
+      }
+      .nav-btn--ghost {
+        color: var(--color-text-secondary);
+      }
+
+      /* Toast */
+      #toast {
+        position: fixed;
+        bottom: 24px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(30, 30, 30, 0.95);
+        color: #fff;
+        padding: 0.75rem 1rem;
+        border-radius: 10px;
+        border: 1px solid var(--color-border);
+        opacity: 0;
+        visibility: hidden;
+        transition:
+          opacity 0.3s,
+          visibility 0.3s;
+        z-index: 2000;
+      }
+      #toast.show {
+        opacity: 1;
+        visibility: visible;
+      }
+      #toast.success {
+        border-color: rgba(46, 204, 113, 0.5);
+      }
+      #toast.error {
+        border-color: rgba(231, 76, 60, 0.5);
+      }
+
+      /* Users table status badge */
+      .status-badge {
+        border-radius: 999px;
+        padding: 0.2rem 0.6rem;
+        font-size: 0.8rem;
+      }
+      .status-active {
+        background: rgba(46, 204, 113, 0.2);
+        color: #2ecc71;
+      }
+      .status-pending {
+        background: rgba(241, 196, 15, 0.2);
+        color: #f1c40f;
+      }
+      .status-inactive {
+        background: rgba(231, 76, 60, 0.2);
+        color: #e74c3c;
+      }
+    </style>
   </head>
   <body>
+    <!-- ==================== LOGIN SCREEN ==================== -->
+    <div id="login-screen" class="view active">
+      <div class="login-container">
+        <div class="logo">نجارة<span>ERP</span></div>
+        <form id="login-form">
+          <div class="form-group">
+            <label for="username">اسم المستخدم</label>
+            <input
+              type="text"
+              id="username"
+              name="Username"
+              placeholder="أدخل اسم المستخدم"
+              autocomplete="username"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="password">كلمة المرور</label>
+            <input
+              type="password"
+              id="password"
+              name="Password"
+              placeholder="أدخل كلمة المرور"
+              autocomplete="current-password"
+              required
+            />
+          </div>
+          <button type="submit" class="main-button" id="login-button">
+            <span>تسجيل الدخول</span>
+            <div class="spinner"></div>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- ==================== PORTAL / LAUNCHPAD ==================== -->
+    <div id="portal-view" class="view">
+      <div class="portal-header">
+        <h1 id="portal-welcome-message"></h1>
+        <p>اختر الوحدة التي تريد العمل عليها</p>
+      </div>
+      <div class="module-grid">
+        <div class="module-card" data-workspace="projects-workspace" data-theme="projects">
+          <h2>المشاريع</h2>
+        </div>
+        <div class="module-card" data-workspace="finance-workspace" data-theme="finance">
+          <h2>المالية</h2>
+        </div>
+        <div class="module-card" data-workspace="hr-workspace" data-theme="hr">
+          <h2>الموارد البشرية</h2>
+        </div>
+        <div class="module-card" data-workspace="system-management-view" data-theme="users">
+          <h2>إدارة المستخدمين</h2>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== SYSTEM MANAGEMENT ==================== -->
+    <nav id="app-navbar" class="app-navbar hidden">
+      <div class="app-navbar__left">
+        <span class="app-brand">Nijjara ERP</span>
+        <button type="button" class="nav-btn" data-target="portal-view">الواجهة الرئيسية</button>
+        <button type="button" class="nav-btn active" data-target="system-management-view">
+          إدارة النظام
+        </button>
+      </div>
+      <div class="app-navbar__right">
+        <span id="navbar-user-label" class="navbar-user"></span>
+        <button type="button" id="logout-button" class="nav-btn nav-btn--ghost">
+          تسجيل الخروج
+        </button>
+      </div>
+    </nav>
+
+    <div id="system-management-view" class="view">
+      <div class="system-wrapper">
+        <header class="system-header">
+          <div>
+            <h1>إدارة النظام</h1>
+            <p class="system-subtitle">نظرة عامة على المستخدمين والأدوار والأذونات</p>
+          </div>
+          <div class="system-actions">
+            <button type="button" id="btn-add-user" class="accent-button">مستخدم جديد</button>
+            <button type="button" id="btn-export-users" class="ghost-button">تصدير</button>
+            <button type="button" id="btn-open-role-setup" class="ghost-button">
+              إعدادات الأذونات
+            </button>
+          </div>
+        </header>
+
+        <section class="overview-cards" id="system-overview-cards"></section>
+
+        <div class="system-body">
+          <aside class="system-sidebar">
+            <button
+              type="button"
+              class="sidebar-link active"
+              data-route="/sys"
+              data-sub-id="Sub_SYS_Overview"
+            >
+              نظرة عامة
+            </button>
+            <button
+              type="button"
+              class="sidebar-link"
+              data-route="/sys/users"
+              data-sub-id="Sub_SYS_Users"
+            >
+              المستخدمون
+            </button>
+            <button
+              type="button"
+              class="sidebar-link"
+              data-route="/sys/roles"
+              data-sub-id="Sub_SYS_Roles"
+            >
+              الأدوار
+            </button>
+            <button
+              type="button"
+              class="sidebar-link"
+              data-route="/sys/permissions"
+              data-sub-id="Sub_SYS_Permissions"
+            >
+              الأذونات
+            </button>
+            <button
+              type="button"
+              class="sidebar-link"
+              data-route="/sys/role-perms"
+              data-sub-id="Sub_SYS_RolePerms"
+            >
+              تعيين أذونات الأدوار
+            </button>
+            <button
+              type="button"
+              class="sidebar-link"
+              data-route="/sys/properties"
+              data-sub-id="Sub_SYS_Properties"
+            >
+              خصائص المستخدم
+            </button>
+            <button
+              type="button"
+              class="sidebar-link"
+              data-route="/sys/sessions"
+              data-sub-id="Sub_SYS_Sessions"
+            >
+              الجلسات
+            </button>
+            <button
+              type="button"
+              class="sidebar-link"
+              data-route="/sys/audit"
+              data-sub-id="Sub_SYS_Audit"
+            >
+              التدقيق
+            </button>
+          </aside>
+
+          <main class="system-content">
+            <section
+              class="system-section active"
+              data-route="/sys"
+              data-sub-id="Sub_SYS_Overview"
+              data-label="نظرة عامة"
+            >
+              <div class="section-header"><h2>نظرة عامة</h2></div>
+              <div class="system-placeholder">سيتم تحميل هذه الشاشة قريبًا.</div>
+            </section>
+
+            <section
+              class="system-section"
+              data-route="/sys/users"
+              data-sub-id="Sub_SYS_Users"
+              data-label="المستخدمون"
+            >
+              <div class="section-header"><h2>المستخدمون</h2></div>
+              <div id="sys-users-canvas" data-view-id="PV_SYS_Users_Table">
+                <?!= include('Users.html'); ?>
+              </div>
+            </section>
+
+            <section
+              class="system-section"
+              data-route="/sys/roles"
+              data-sub-id="Sub_SYS_Roles"
+              data-label="الأدوار"
+            >
+              <div class="section-header"><h2>الأدوار</h2></div>
+              <div class="system-placeholder">سيتم تحميل هذه الشاشة قريبًا.</div>
+            </section>
+
+            <section
+              class="system-section"
+              data-route="/sys/permissions"
+              data-sub-id="Sub_SYS_Permissions"
+              data-label="الأذونات"
+            >
+              <div class="section-header"><h2>الأذونات</h2></div>
+              <div class="system-placeholder">سيتم تحميل هذه الشاشة قريبًا.</div>
+            </section>
+
+            <section
+              class="system-section"
+              data-route="/sys/role-perms"
+              data-sub-id="Sub_SYS_RolePerms"
+              data-label="تعيين أذونات الأدوار"
+            >
+              <div class="section-header"><h2>تعيين أذونات الأدوار</h2></div>
+              <div class="system-placeholder">سيتم تحميل هذه الشاشة قريبًا.</div>
+            </section>
+
+            <section
+              class="system-section"
+              data-route="/sys/properties"
+              data-sub-id="Sub_SYS_Properties"
+              data-label="خصائص المستخدم"
+            >
+              <div class="section-header"><h2>خصائص المستخدم</h2></div>
+              <div class="system-placeholder">سيتم تحميل هذه الشاشة قريبًا.</div>
+            </section>
+
+            <section
+              class="system-section"
+              data-route="/sys/sessions"
+              data-sub-id="Sub_SYS_Sessions"
+              data-label="الجلسات"
+            >
+              <div class="section-header"><h2>الجلسات</h2></div>
+              <div class="system-placeholder">سيتم تحميل هذه الشاشة قريبًا.</div>
+            </section>
+
+            <section
+              class="system-section"
+              data-route="/sys/audit"
+              data-sub-id="Sub_SYS_Audit"
+              data-label="التدقيق"
+            >
+              <div class="section-header"><h2>التدقيق</h2></div>
+              <div class="system-placeholder">سيتم تحميل هذه الشاشة قريبًا.</div>
+            </section>
+          </main>
+        </div>
+      </div>
+    </div>
+
+    <div id="projects-workspace" class="view">
+      <div class="workspace placeholder">
+        <header class="workspace-header"><h1 class="workspace-title">قيد التطوير</h1></header>
+      </div>
+    </div>
+    <div id="finance-workspace" class="view">
+      <div class="workspace placeholder">
+        <header class="workspace-header"><h1 class="workspace-title">قيد التطوير</h1></header>
+      </div>
+    </div>
+    <div id="hr-workspace" class="view">
+      <div class="workspace placeholder">
+        <header class="workspace-header"><h1 class="workspace-title">قيد التطوير</h1></header>
+      </div>
+    </div>
+
+    <!-- ==================== NEW MODALS ONLY ==================== -->
+    <div id="add-user-modal" class="modal-overlay">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title">إضافة مستخدم جديد</h2>
+          <button class="close-button" aria-label="Close">&times;</button>
+        </div>
+        <form id="add-user-form">
+          <div class="modal-body">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="add-Full_Name">الاسم الكامل</label>
+                <input type="text" id="add-Full_Name" name="Full_Name" required />
+              </div>
+              <div class="form-group">
+                <label for="add-Email">البريد الإلكتروني</label>
+                <input type="email" id="add-Email" name="Email" required />
+              </div>
+              <div class="form-group">
+                <label for="add-Username">اسم المستخدم</label>
+                <input type="text" id="add-Username" name="Username" required />
+              </div>
+              <div class="form-group">
+                <label for="add-Role_Id">الدور</label>
+                <select id="add-Role_Id" name="Role_Id" required></select>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="main-button">
+              <span>حفظ المستخدم</span>
+              <div class="spinner"></div>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="edit-user-modal" class="modal-overlay">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title">تعديل بيانات المستخدم</h2>
+          <button class="close-button" aria-label="Close">&times;</button>
+        </div>
+        <form id="edit-user-form">
+          <input type="hidden" id="edit-User_Id" name="User_Id" />
+          <div class="modal-body">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="edit-Full_Name">الاسم الكامل</label>
+                <input type="text" id="edit-Full_Name" name="Full_Name" required />
+              </div>
+              <div class="form-group">
+                <label for="edit-Email">البريد الإلكتروني</label>
+                <input type="email" id="edit-Email" name="Email" required />
+              </div>
+              <div class="form-group">
+                <label for="edit-Username">اسم المستخدم</label>
+                <input type="text" id="edit-Username" name="Username" required />
+              </div>
+              <div class="form-group">
+                <label for="edit-Role_Id">الدور</label>
+                <select id="edit-Role_Id" name="Role_Id" required></select>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="main-button">
+              <span>حفظ التعديلات</span>
+              <div class="spinner"></div>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="delete-confirm-modal" class="modal-overlay">
+      <div class="modal-content" style="width: 450px">
+        <div class="modal-header">
+          <h2 class="modal-title">تأكيد الحذف</h2>
+          <button class="close-button" aria-label="Close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p>هل أنت متأكد أنك تريد إلغاء تنشيط هذا المستخدم؟</p>
+          <p
+            id="user-to-delete-name"
+            style="font-weight: bold; text-align: center; margin-top: 1rem"
+          ></p>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="main-button"
+            id="confirm-delete-btn"
+            style="background-color: var(--color-danger); color: white"
+          >
+            <span>تأكيد الإلغاء</span>
+            <div class="spinner"></div>
+          </button>
+          <button
+            type="button"
+            id="cancel-delete-btn"
+            style="
+              font-size: 1rem;
+              padding: 0.85rem;
+              border: 1px solid var(--color-border);
+              border-radius: 8px;
+              background: none;
+              color: var(--color-text-primary);
+              cursor: pointer;
+              flex-grow: 1;
+              text-align: center;
+            "
+          >
+            تراجع
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="reset-password-modal" class="modal-overlay">
+      <div class="modal-content" style="width: 450px">
+        <div class="modal-header">
+          <h2 class="modal-title">إعادة تعيين كلمة المرور</h2>
+          <button class="close-button" aria-label="Close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p>هل أنت متأكد أنك تريد إعادة تعيين كلمة مرور هذا المستخدم؟</p>
+          <p
+            id="user-to-reset-name"
+            style="font-weight: bold; text-align: center; margin-top: 1rem"
+          ></p>
+          <div class="form-group" style="margin-top: 1rem">
+            <label for="reset-password-input">كلمة المرور الجديدة</label>
+            <input
+              type="password"
+              id="reset-password-input"
+              name="NewPassword"
+              placeholder="أدخل كلمة المرور الجديدة"
+              style="
+                width: 100%;
+                padding: 0.75rem;
+                border-radius: 8px;
+                border: 1px solid var(--color-border);
+                background: var(--color-input-bg);
+                color: var(--color-text-primary);
+              "
+              required
+            />
+          </div>
+          <div
+            id="reset-password-result"
+            style="
+              margin-top: 1rem;
+              text-align: center;
+              font-size: 1.1rem;
+              color: var(--color-success);
+              display: none;
+            "
+          ></div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="main-button"
+            id="confirm-reset-btn"
+            style="background-color: var(--color-accent); color: white"
+          >
+            <span>تأكيد إعادة التعيين</span>
+            <div class="spinner"></div>
+          </button>
+          <button
+            type="button"
+            id="cancel-reset-btn"
+            style="
+              font-size: 1rem;
+              padding: 0.85rem;
+              border: 1px solid var(--color-border);
+              border-radius: 8px;
+              background: none;
+              color: var(--color-text-primary);
+              cursor: pointer;
+              flex-grow: 1;
+              text-align: center;
+            "
+          >
+            تراجع
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="toast"></div>
+
     <script>
-      // --- NAVBAR BUTTONS → SWITCH VIEWS (keep Arabic labels) ---
-      (() => {
-        const navButtons = document.querySelectorAll('.app-navbar .nav-btn[data-target]');
-        if (!navButtons.length) return;
-        navButtons.forEach((btn) => {
+      document.addEventListener('DOMContentLoaded', () => {
+        // --- STATE ---
+        const AppState = {
+          currentUser: null,
+          users: [],
+          roles: [],
+          userToDelete: null,
+          userToReset: null,
+          currentSysRoute: '/sys',
+        };
+
+        // --- VIEW HELPERS ---
+        const views = Array.from(document.querySelectorAll('.view'));
+        const switchView = (viewId) => {
+          let matched = false;
+          views.forEach((view) => {
+            const isTarget = view.id === viewId;
+            if (isTarget) matched = true;
+            view.classList.toggle('active', isTarget);
+          });
+          if (!matched) console.warn('switchView: no view matched id', viewId);
+        };
+
+        const toast = document.getElementById('toast');
+        const showToast = (message, isError = false) => {
+          toast.textContent = message;
+          toast.className = isError ? 'error' : 'success';
+          toast.classList.add('show');
+          setTimeout(() => toast.classList.remove('show'), 3000);
+        };
+        const toggleButtonLoading = (button, isLoading) => {
+          button.classList.toggle('loading', isLoading);
+          button.disabled = isLoading;
+        };
+
+        // --- SYSTEM ROUTER ---
+        const sysSidebarLinks = Array.from(
+          document.querySelectorAll('.system-sidebar .sidebar-link[data-route]')
+        );
+        const sysSections = Array.from(
+          document.querySelectorAll('.system-content .system-section[data-route]')
+        );
+        const sysRouteConfig = {};
+        const sysFallbackRoute = '/sys';
+        const getRouteFromHash = () => {
+          const h = window.location.hash || '';
+          const cand = h.replace(/^#/, '') || sysFallbackRoute;
+          return sysRouteConfig[cand] ? cand : sysFallbackRoute;
+        };
+        const setActiveSystemRoute = (route, { replace = false, silent = false } = {}) => {
+          const targetRoute = sysRouteConfig[route] ? route : sysFallbackRoute;
+          sysSections.forEach(({ dataset, classList }) =>
+            classList.toggle('active', dataset.route === targetRoute)
+          );
+          sysSidebarLinks.forEach((btn) =>
+            btn.classList.toggle('active', btn.dataset.route === targetRoute)
+          );
+          AppState.currentSysRoute = targetRoute;
+          if (!silent) {
+            const nextHash = `#${targetRoute}`;
+            if (replace) window.history.replaceState({ route: targetRoute }, '', nextHash);
+            else window.history.pushState({ route: targetRoute }, '', nextHash);
+          }
+        };
+        if (sysSidebarLinks.length && sysSections.length) {
+          sysSections.forEach((section) => {
+            const route = section.dataset.route;
+            if (route) sysRouteConfig[route] = { section, label: section.dataset.label || '' };
+          });
+          const initialRoute = getRouteFromHash();
+          setActiveSystemRoute(initialRoute, { replace: true, silent: true });
+          if (!window.location.hash)
+            window.history.replaceState({ route: initialRoute }, '', `#${initialRoute}`);
+          sysSidebarLinks.forEach((btn) =>
+            btn.addEventListener('click', (e) => {
+              e.preventDefault();
+              const route = btn.dataset.route || sysFallbackRoute;
+              setActiveSystemRoute(route);
+            })
+          );
+          window.addEventListener('popstate', (e) => {
+            const t = (e.state && e.state.route) || getRouteFromHash() || sysFallbackRoute;
+            setActiveSystemRoute(t, { replace: true, silent: true });
+          });
+          window.addEventListener('hashchange', () => {
+            const t = getRouteFromHash();
+            setActiveSystemRoute(t, { replace: true, silent: true });
+          });
+        }
+
+        // --- DOM ---
+        const loginForm = document.getElementById('login-form');
+        const loginButton = document.getElementById('login-button');
+        const portalWelcomeMsg = document.getElementById('portal-welcome-message');
+        const addUserBtn = document.getElementById('btn-add-user');
+        const addUserModal = document.getElementById('add-user-modal');
+        const addUserForm = document.getElementById('add-user-form');
+        const editUserModal = document.getElementById('edit-user-modal');
+        const editUserForm = document.getElementById('edit-user-form');
+        const deleteConfirmModal = document.getElementById('delete-confirm-modal');
+        const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+        const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
+        const userToDeleteNameEl = document.getElementById('user-to-delete-name');
+        const resetPasswordModal = document.getElementById('reset-password-modal');
+        const confirmResetBtn = document.getElementById('confirm-reset-btn');
+        const cancelResetBtn = document.getElementById('cancel-reset-btn');
+        const userToResetNameEl = document.getElementById('user-to-reset-name');
+        const resetPasswordResult = document.getElementById('reset-password-result');
+        const addUserRoleSelect = document.getElementById('add-Role_Id');
+        const editUserRoleSelect = document.getElementById('edit-Role_Id');
+        const usersCanvas = document.getElementById('sys-users-canvas');
+
+        // Dynamic query for users table (may be injected by Users.html)
+        const getUsersTableBody = () => document.querySelector('#users-table tbody');
+
+        // --- UTIL ---
+        const openModal = (m) => {
+          m.classList.add('active');
+          const f = m.querySelector('form');
+          if (f) f.querySelectorAll('input,select,textarea').forEach((el) => (el.disabled = false));
+        };
+        const closeModal = (m) => {
+          m.classList.remove('active');
+          const f = m.querySelector('form');
+          if (f) f.querySelectorAll('input,select,textarea').forEach((el) => (el.disabled = true));
+        };
+        [addUserModal, editUserModal, deleteConfirmModal, resetPasswordModal].forEach((modal) => {
+          modal.addEventListener('click', (e) => {
+            if (
+              e.target.classList.contains('modal-overlay') ||
+              e.target.classList.contains('close-button')
+            ) {
+              closeModal(modal);
+              if (modal === resetPasswordModal) {
+                resetPasswordResult.style.display = 'none';
+                resetPasswordResult.textContent = '';
+                const f = document.getElementById('reset-password-input');
+                if (f) f.value = '';
+              }
+            }
+          });
+        });
+
+        const populateRoleDropdowns = () => {
+          const createOption = (role) =>
+            `<option value="${role.Role_Id}">${role.Role_Title}</option>`;
+          const optionsHTML = (AppState.roles || []).map(createOption).join('');
+          if (addUserRoleSelect) addUserRoleSelect.innerHTML = optionsHTML;
+          if (editUserRoleSelect) editUserRoleSelect.innerHTML = optionsHTML;
+        };
+        const ensureRolesLoaded = (cb) => {
+          if (AppState.roles && AppState.roles.length) {
+            populateRoleDropdowns();
+            cb && cb();
+            return;
+          }
+          google.script.run
+            .withSuccessHandler((roles) => {
+              AppState.roles = roles || [];
+              populateRoleDropdowns();
+              cb && cb();
+            })
+            .withFailureHandler((error) => {
+              console.error('Failed to load roles:', error);
+              showToast(error.message || 'فشل تحميل الأدوار', true);
+              cb && cb();
+            })
+            .getRoles();
+        };
+        const checkPermissions = () => {
+          if (!addUserBtn) return;
+          const cu = AppState.currentUser || {};
+          const roleKey = cu.role || cu.Role_Key || cu.Role_Id || cu.Role || '';
+          const roleTitle = cu.roleTitle || cu.Role_Title || '';
+          const isAdmin =
+            /admin|مسؤول/i.test(String(roleKey)) || /admin|مسؤول/i.test(String(roleTitle));
+          addUserBtn.style.display = isAdmin ? 'block' : 'none';
+        };
+
+        // --- RENDER USERS TABLE ---
+        const renderUsersTable = () => {
+          const tbody = getUsersTableBody();
+          if (!tbody) return;
+          tbody.innerHTML = '';
+          AppState.users.forEach((user) => {
+            const statusValueRaw = user.Status ? String(user.Status).toLowerCase() : '';
+            const activeWords = ['active', 'نشط'];
+            const inactiveWords = ['inactive', 'موقوف', 'محذوف', 'متوقف'];
+            const pendingWords = ['pending', 'قيد التنفيذ', 'قيد الانتظار'];
+            let statusKey = 'inactive';
+            if (statusValueRaw && activeWords.includes(statusValueRaw)) statusKey = 'active';
+            else if (statusValueRaw && pendingWords.includes(statusValueRaw)) statusKey = 'pending';
+            else if (statusValueRaw && inactiveWords.includes(statusValueRaw))
+              statusKey = 'inactive';
+            else
+              statusKey =
+                String(user.IsActive).toLowerCase() === 'true' || user.IsActive === true
+                  ? 'active'
+                  : 'inactive';
+
+            const statusDictionary = {
+              active: { css: 'status-active', label: 'نشط' },
+              pending: { css: 'status-pending', label: 'قيد التنفيذ' },
+              inactive: { css: 'status-inactive', label: 'موقوف' },
+            };
+            const statusMeta = statusDictionary[statusKey] || statusDictionary.inactive;
+            const toggleIcon =
+              statusKey === 'active'
+                ? `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`
+                : `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
+
+            const resetBtn = `<button class="action-btn reset-password-btn" title="إعادة تعيين كلمة المرور" data-user-id="${user.User_Id}"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2"/><path d="M7 13a5 5 0 1 0 7 7l5-5a5 5 0 0 0-7-7L7 13z"/></svg></button>`;
+
+            const row = `
+              <tr>
+                <td>${user.Full_Name || ''}</td>
+                <td>${user.Email || ''}</td>
+                <td>${user.Role_Id || ''}</td>
+                <td><span class="status-badge ${statusMeta.css}">${statusMeta.label}</span></td>
+                <td class="table-actions">
+                  <button class="action-btn edit-user-btn" title="تعديل" data-user-id="${user.User_Id}"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
+                  <button class="action-btn toggle-status-btn" title="تغيير الحالة" data-user-id="${user.User_Id}" data-current-status='${statusKey === 'active' ? 'true' : 'false'}'>${toggleIcon}</button>
+                  <button class="action-btn delete-user-btn" title="حذف" data-user-id="${user.User_Id}"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
+                  ${resetBtn}
+                </td>
+              </tr>`;
+            const tbody2 = getUsersTableBody();
+            if (tbody2) tbody2.insertAdjacentHTML('beforeend', row);
+          });
+        };
+
+        // --- SERVER CALLS ---
+        const handleLogin = (e) => {
+          e.preventDefault();
+          const username = document.getElementById('username').value;
+          const password = document.getElementById('password').value;
+          toggleButtonLoading(loginButton, true);
+
+          google.script.run
+            .withSuccessHandler((payload) => {
+              toggleButtonLoading(loginButton, false);
+              if (!payload || !payload.currentUser) {
+                showToast('فشل استلام بيانات المستخدم من الخادم.', true);
+                return;
+              }
+
+              AppState.currentUser = payload.currentUser;
+              AppState.roles = payload.roles || [];
+              fetchAllUsers();
+
+              google.script.run
+                .withSuccessHandler((roles) => {
+                  AppState.roles = roles || [];
+                  populateRoleDropdowns();
+                })
+                .withFailureHandler((error) => {
+                  showToast(error.message || 'فشل تحميل الأدوار', true);
+                })
+                .getRoles();
+
+              portalWelcomeMsg.textContent = `أهلاً بك، ${AppState.currentUser.fullName || AppState.currentUser.Full_Name || ''}`;
+              document.getElementById('navbar-user-label').textContent =
+                AppState.currentUser.fullName || AppState.currentUser.Full_Name || '';
+              checkPermissions();
+
+              // FIX: show navbar and route to System → Users
+              const navbar = document.getElementById('app-navbar');
+              if (navbar) navbar.classList.remove('hidden');
+              switchView('system-management-view');
+              setActiveSystemRoute('/sys/users');
+              showToast('تم تسجيل الدخول بنجاح!');
+            })
+            .withFailureHandler((error) => {
+              toggleButtonLoading(loginButton, false);
+              showToast(error.message || 'حدث خطأ أثناء تسجيل الدخول', true);
+            })
+            .loginAndGetData(username, password);
+        };
+
+        const fetchAllUsers = () => {
+          const tbody = getUsersTableBody();
+          if (tbody) {
+            tbody.innerHTML = `
+              <tr>
+                <td><div class="skeleton skeleton-text" style="width:80px;height:18px;"></div></td>
+                <td><div class="skeleton skeleton-text" style="width:120px;height:18px;"></div></td>
+                <td><div class="skeleton skeleton-text" style="width:60px;height:18px;"></div></td>
+                <td><div class="skeleton skeleton-badge" style="width:50px;height:18px;"></div></td>
+                <td><div class="skeleton skeleton-actions" style="width:100px;height:18px;"></div></td>
+              </tr>`;
+          }
+
+          google.script.run
+            .withSuccessHandler((users) => {
+              AppState.users = users || [];
+              renderUsersTable();
+              checkPermissions();
+            })
+            .withFailureHandler((error) => {
+              const tb = getUsersTableBody();
+              if (tb) tb.innerHTML = '';
+              showToast(error.message || 'تعذر تحميل المستخدمين', true);
+            })
+            .getAllUsers();
+        };
+
+        const handleCreateUser = (e) => {
+          e.preventDefault();
+          const saveButton = addUserForm.querySelector('.main-button');
+          const userData = {
+            Full_Name: document.getElementById('add-Full_Name').value,
+            Email: document.getElementById('add-Email').value,
+            Username: document.getElementById('add-Username').value,
+            Role_Id: addUserRoleSelect.value,
+          };
+          toggleButtonLoading(saveButton, true);
+
+          google.script.run
+            .withSuccessHandler((response) => {
+              toggleButtonLoading(saveButton, false);
+              if (response && response.newUser) {
+                AppState.users.push(response.newUser);
+                renderUsersTable();
+                closeModal(addUserModal);
+                showToast(response.message || 'تم إنشاء المستخدم بنجاح');
+                addUserForm.reset();
+              } else showToast('لم يتم إنشاء المستخدم', true);
+            })
+            .withFailureHandler((error) => {
+              toggleButtonLoading(saveButton, false);
+              showToast(error.message || 'فشل إنشاء المستخدم', true);
+            })
+            .createNewUser(userData, AppState.currentUser ? AppState.currentUser.userId : null);
+        };
+
+        const handleEditUser = (e) => {
+          e.preventDefault();
+          const saveButton = editUserForm.querySelector('.main-button');
+          const userId = document.getElementById('edit-User_Id').value;
+          const updatedData = {
+            Full_Name: document.getElementById('edit-Full_Name').value,
+            Email: document.getElementById('edit-Email').value,
+            Username: document.getElementById('edit-Username').value,
+            Role_Id: editUserRoleSelect.value,
+          };
+          toggleButtonLoading(saveButton, true);
+
+          google.script.run
+            .withSuccessHandler((response) => {
+              toggleButtonLoading(saveButton, false);
+              const idx = AppState.users.findIndex((u) => u.User_Id == userId);
+              if (idx !== -1 && response && response.updatedUser)
+                AppState.users[idx] = response.updatedUser;
+              renderUsersTable();
+              closeModal(editUserModal);
+              showToast(response.message || 'تم حفظ التعديلات');
+            })
+            .withFailureHandler((error) => {
+              toggleButtonLoading(saveButton, false);
+              showToast(error.message || 'فشل حفظ التعديلات', true);
+            })
+            .updateUserData(userId, updatedData, AppState.currentUser.userId);
+        };
+
+        const handleToggleUserStatus = (userId, currentStatus) => {
+          const newStatus = !(currentStatus === true || currentStatus === 'true');
+          const idx = AppState.users.findIndex((u) => u.User_Id == userId);
+          if (idx !== -1) {
+            AppState.users[idx].IsActive = newStatus;
+            renderUsersTable();
+          }
+
+          google.script.run
+            .withSuccessHandler((response) => {
+              if (response && response.updatedUser) {
+                const i = AppState.users.findIndex((u) => u.User_Id == userId);
+                if (i !== -1) AppState.users[i] = response.updatedUser;
+                renderUsersTable();
+                showToast(response.message || 'تم تغيير الحالة');
+              }
+            })
+            .withFailureHandler((error) => {
+              if (idx !== -1) {
+                AppState.users[idx].IsActive = !newStatus;
+                renderUsersTable();
+              }
+              showToast(error.message || 'فشل تغيير الحالة', true);
+            })
+            .setUserStatus(userId, newStatus, AppState.currentUser.userId);
+        };
+
+        const handleDeleteUser = () => {
+          if (!AppState.userToDelete) return;
+          const saveButton = confirmDeleteBtn;
+          toggleButtonLoading(saveButton, true);
+          google.script.run
+            .withSuccessHandler((response) => {
+              toggleButtonLoading(saveButton, false);
+              const idx = AppState.users.findIndex(
+                (u) => u.User_Id == AppState.userToDelete.User_Id
+              );
+              if (idx !== -1) AppState.users[idx] = response.updatedUser;
+              renderUsersTable();
+              closeModal(deleteConfirmModal);
+              showToast(response.message || 'تم إلغاء تنشيط المستخدم بنجاح');
+              AppState.userToDelete = null;
+            })
+            .withFailureHandler((error) => {
+              toggleButtonLoading(saveButton, false);
+              showToast(error.message || 'فشل إلغاء تنشيط المستخدم', true);
+              AppState.userToDelete = null;
+            })
+            .deleteUser(AppState.userToDelete.User_Id, AppState.currentUser.userId);
+        };
+
+        const handleResetUserPassword = () => {
+          if (!AppState.userToReset) return;
+          const saveButton = confirmResetBtn;
+          toggleButtonLoading(saveButton, true);
+          resetPasswordResult.style.display = 'none';
+          resetPasswordResult.textContent = '';
+          const targetUserId = AppState.userToReset.User_Id;
+          const newPasswordField = document.getElementById('reset-password-input');
+          const newPassword = newPasswordField ? newPasswordField.value : '';
+          if (!newPassword || !newPassword.trim()) {
+            toggleButtonLoading(saveButton, false);
+            showToast('يرجى إدخال كلمة مرور جديدة.', true);
+            return;
+          }
+
+          google.script.run
+            .withSuccessHandler((response) => {
+              toggleButtonLoading(saveButton, false);
+              if (response && response.success && response.password) {
+                resetPasswordResult.textContent = `تم تحديث كلمة المرور إلى: ${response.password}`;
+                resetPasswordResult.style.display = 'block';
+                showToast(response.message || 'تم تحديث كلمة المرور');
+                fetchAllUsers();
+              } else {
+                showToast(
+                  response && response.message ? response.message : 'تعذر تحديث كلمة المرور',
+                  true
+                );
+              }
+              if (newPasswordField) newPasswordField.value = '';
+              AppState.userToReset = null;
+            })
+            .withFailureHandler((error) => {
+              toggleButtonLoading(saveButton, false);
+              showToast(error.message || 'تعذر تحديث كلمة المرور', true);
+              AppState.userToReset = null;
+            })
+            .resetPasswordForUser(targetUserId, AppState.currentUser.userId, newPassword);
+        };
+
+        // --- EVENTS ---
+        loginForm.addEventListener('submit', handleLogin);
+
+        // Module cards
+        document.querySelectorAll('.module-card').forEach((card) => {
+          card.addEventListener('click', () => {
+            const target = card.getAttribute('data-workspace');
+            if (!target) return showToast('هذه الوحدة قيد التطوير');
+            switchView(target);
+            if (target === 'system-management-view') {
+              setActiveSystemRoute('/sys/users');
+              fetchAllUsers();
+            }
+          });
+        });
+
+        // Navbar buttons
+        document.querySelectorAll('.app-navbar .nav-btn[data-target]').forEach((btn) => {
           btn.addEventListener('click', () => {
             const target = btn.getAttribute('data-target');
             if (!target) return;
-            // system management uses hash routing for subtabs
             if (target === 'system-management-view') {
               switchView('system-management-view');
               setActiveSystemRoute('/sys');
             } else {
               switchView(target);
             }
-            navButtons.forEach((b) => b.classList.remove('active'));
+            document
+              .querySelectorAll('.app-navbar .nav-btn')
+              .forEach((b) => b.classList.remove('active'));
             btn.classList.add('active');
           });
         });
-      })();
 
-      // --- ENSURE ROUTER APPLIES LABELS FROM DOM ---
-      (() => {
-        if (!window.__sysRouterReady) {
-          window.__sysRouterReady = true;
-
-          const sysSidebarLinks = Array.from(
-            document.querySelectorAll('.system-sidebar .sidebar-link[data-route]')
+        // Add User
+        if (addUserBtn)
+          addUserBtn.addEventListener('click', () =>
+            ensureRolesLoaded(() => openModal(addUserModal))
           );
-          const sysSections = Array.from(
-            document.querySelectorAll('.system-content .system-section[data-route]')
-          );
+        addUserForm.addEventListener('submit', handleCreateUser);
+        editUserForm.addEventListener('submit', handleEditUser);
 
-          // Build/refresh route map from DOM
-          const routeMap = {};
-          sysSections.forEach((section) => {
-            const route = section.dataset.route;
-            if (!route) return;
-            const label =
-              section.dataset.label ||
-              (section.querySelector('.section-header h2')
-                ? section.querySelector('.section-header h2').textContent.trim()
-                : '');
-            routeMap[route] = { section, label, route };
-          });
+        // Users table actions via delegation (works even if table injected later)
+        if (usersCanvas) {
+          usersCanvas.addEventListener('click', (e) => {
+            const editButton = e.target.closest('.edit-user-btn');
+            const toggleButton = e.target.closest('.toggle-status-btn');
+            const deleteButton = e.target.closest('.delete-user-btn');
+            const resetButton = e.target.closest('.reset-password-btn');
 
-          // Update active section + sidebar + section header text if needed
-          const applyRoute = (route) => {
-            const conf = routeMap[route] || routeMap['/sys'];
-            if (!conf) return;
-            const activeRoute = conf.route;
-            sysSections.forEach((section) => {
-              section.classList.toggle('active', section.dataset.route === activeRoute);
-            });
-            sysSidebarLinks.forEach((btn) => {
-              btn.classList.toggle('active', btn.dataset.route === activeRoute);
-            });
-            // Make sure the visible section header shows the Arabic label
-            const header = conf.section.querySelector('.section-header h2');
-            if (header && conf.label) header.textContent = conf.label;
-          };
-
-          // Sync on hash
-          const readHashRoute = () => {
-            const raw = (window.location.hash || '').replace(/^#/, '');
-            return routeMap[raw] ? raw : '/sys';
-          };
-
-          window.addEventListener('hashchange', () => {
-            applyRoute(readHashRoute());
-          });
-
-          // Initial apply if we're already on the System view
-          if (document.getElementById('system-management-view')?.classList.contains('active')) {
-            applyRoute(readHashRoute());
-          }
-
-          // Sidebar clicks set the hash (source of truth)
-          sysSidebarLinks.forEach((btn) => {
-            btn.addEventListener('click', (e) => {
-              e.preventDefault();
-              const route = btn.dataset.route || '/sys';
-              if (window.location.hash !== `#${route}`) {
-                window.location.hash = `#${route}`;
-              } else {
-                applyRoute(route); // already same, still apply
+            if (editButton) {
+              const userId = editButton.dataset.userId;
+              const userToEdit = AppState.users.find((u) => u.User_Id == userId);
+              if (userToEdit) {
+                ensureRolesLoaded(() => {
+                  document.getElementById('edit-User_Id').value = userToEdit.User_Id;
+                  document.getElementById('edit-Full_Name').value = userToEdit.Full_Name || '';
+                  document.getElementById('edit-Email').value = userToEdit.Email || '';
+                  document.getElementById('edit-Username').value = userToEdit.Username || '';
+                  editUserRoleSelect.value = userToEdit.Role_Id || '';
+                  openModal(editUserModal);
+                });
               }
-            });
-          });
-
-          // Expose a helper for post-login navigation
-          window.__goToSystemUsers = () => {
-            switchView('system-management-view');
-            const target = '/sys/users';
-            if (window.location.hash !== `#${target}`) {
-              window.location.hash = `#${target}`;
-            } else {
-              applyRoute(target);
             }
-            const navbar = document.getElementById('app-navbar');
-            if (navbar) navbar.classList.remove('hidden');
-          };
+
+            if (toggleButton) {
+              const userId = toggleButton.dataset.userId;
+              const currentStatus = toggleButton.dataset.currentStatus;
+              handleToggleUserStatus(userId, currentStatus);
+            }
+
+            if (deleteButton) {
+              const userId = deleteButton.dataset.userId;
+              const userToDelete = AppState.users.find((u) => u.User_Id == userId);
+              if (userToDelete) {
+                AppState.userToDelete = userToDelete;
+                userToDeleteNameEl.textContent =
+                  userToDelete.Full_Name || userToDelete.Username || userId;
+                openModal(deleteConfirmModal);
+              } else {
+                userToDeleteNameEl.textContent = 'مستخدم غير معروف';
+                openModal(deleteConfirmModal);
+              }
+            }
+
+            if (resetButton) {
+              const userId = resetButton.dataset.userId;
+              const userToReset = AppState.users.find((u) => u.User_Id == userId);
+              if (userToReset) {
+                AppState.userToReset = userToReset;
+                userToResetNameEl.textContent = userToReset.Full_Name || '';
+                resetPasswordResult.style.display = 'none';
+                resetPasswordResult.textContent = '';
+                openModal(resetPasswordModal);
+              }
+            }
+          });
         }
-      })();
+
+        // Delete / Reset modal buttons
+        confirmDeleteBtn.addEventListener('click', handleDeleteUser);
+        cancelDeleteBtn.addEventListener('click', () => closeModal(deleteConfirmModal));
+        confirmResetBtn.addEventListener('click', handleResetUserPassword);
+        cancelResetBtn.addEventListener('click', () => {
+          closeModal(resetPasswordModal);
+          resetPasswordResult.style.display = 'none';
+          resetPasswordResult.textContent = '';
+          const f = document.getElementById('reset-password-input');
+          if (f) f.value = '';
+        });
+
+        // Init
+        switchView('login-screen');
+      });
     </script>
   </body>
 </html>
